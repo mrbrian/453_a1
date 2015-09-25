@@ -63,6 +63,9 @@ protected:
     // Called when the mouse moves
     virtual void mouseMoveEvent(QMouseEvent * event);
 
+    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyReleaseEvent(QKeyEvent *event);
+
 private:
 
     // member variables for shader manipulation
@@ -74,6 +77,7 @@ private:
     GLuint m_VMatrixUniform; // view matrix
     GLuint m_PMatrixUniform; // projection matrix
 
+    GLuint m_triVbo;
     GLuint m_boxVbo;
 
     QOpenGLShaderProgram *m_program;
@@ -97,6 +101,8 @@ private:
     Game *game;
 
     int drawMode;
+    bool scaling;
+    float scale;
     QPoint prevMousePos;
     QVector3D rotation;
     QVector3D rotationVel;

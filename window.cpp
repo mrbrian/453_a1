@@ -112,8 +112,6 @@ void Window::newGame()
 // Game updating function
 void Window::update()
 {
-    //QTextStream cout(stdout);
-    //cout << "Tick.\n";
     game->tick();
     renderer->update();
 }
@@ -129,17 +127,22 @@ void Window::pause()
 void Window::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == int(Qt::Key_Left))
-        game->moveLeft();
-    if (event->key() == int(Qt::Key_Right))
+        game->moveLeft();    
+    else if (event->key() == int(Qt::Key_Right))
         game->moveRight();
-    if (event->key() == int(Qt::Key_Up))
+    else if (event->key() == int(Qt::Key_Up))
         game->rotateCCW();
-    if (event->key() == int(Qt::Key_Down))
+    else if (event->key() == int(Qt::Key_Down))
         game->rotateCW();
-    if (event->key() == int(Qt::Key_Space))
+    else if (event->key() == int(Qt::Key_Space))
         game->drop();
-
+    else
+    {
+        QMainWindow::keyPressEvent(event);
+        return;
+    }
     renderer->update();
+
 }
 
 // Sets the given colour
@@ -148,8 +151,8 @@ void Window::setDrawMode(QAction * action)
     if (action == mWireAction)
         renderer->setDrawMode(GL_LINES);
     else if (action == mFaceAction)
-        renderer->setDrawMode(GL_TRIANGLES);
+        renderer->setDrawMode(GL_QUADS);
     else
-        renderer->setDrawMode(GL_TRIANGLES);
+        renderer->setDrawMode(GL_QUADS);
 
 }

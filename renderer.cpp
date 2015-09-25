@@ -7,7 +7,8 @@
 Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    drawMode = GL_TRIANGLES;
+    drawMode = GL_QUADS;
+    scale = 1;
 }
 
 // constructor
@@ -41,6 +42,7 @@ void Renderer::initializeGL()
     m_MMatrixUniform = m_program->uniformLocation("model_matrix");
     m_programID = m_program->programId();
 
+    generateBorderTriangles();
     setupBox();
 }
 
@@ -59,6 +61,7 @@ void Renderer::paintGL()
     cameraTransformation.rotate(rotation.x(), 1, 0, 0);
     cameraTransformation.rotate(rotation.y(), 0, 1, 0);
     cameraTransformation.rotate(rotation.z(), 0, 0, 1);
+    cameraTransformation.scale(scale);
 
     QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, 40);
     QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
@@ -82,8 +85,6 @@ void Renderer::paintGL()
     // the game so that we can draw it starting at (0,0) but have
     // it appear centered in the window.
     QVector3D offset = QVector3D(-5.0f, -12.0f, 0.0f);
-
-    generateCube(Qt::gray);
 
     drawWalls(offset);
 
@@ -118,7 +119,14 @@ void Renderer::paintGL()
         generateCube(colors[cell]);
 
         drawBox();
+
     }
+
+    QMatrix4x4 b;
+    b.translate(offset);
+    glUniformMatrix4fv(m_MMatrixUniform, 1, false, b.data());
+    drawTriangles();
+
     // deactivate the program
     m_program->release();
 }
@@ -143,45 +151,81 @@ void Renderer::resizeGL(int w, int h)
 
 }
 
+// add vertices to rectangle list
+const float tri_vertList [] = {
+    0.0, 0.0, 0.0,  // bottom left triangle
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+
+    9.0, 0.0, 0.0,  // bottom right triangle
+    10.0, 0.0, 0.0,
+    10.0, 1.0, 0.0,
+
+    0.0, 19.0, 0.0, // top left triangle
+    1.0, 20.0, 0.0,
+    0.0, 20.0, 0.0,
+
+    10.0, 19.0, 0.0,    // top right triangle
+    10.0, 20.0, 0.0,
+    9.0, 20.0, 0.0 };
+
+float tri_colourList [] = {
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+
+    1, 0, 0,
+    1, 0, 0,
+    1, 0, 0,
+};
+
+float tri_normalList [] = {
+    0.0f, 0.0f, 1.0f,    // facing viewer
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+};
+
 // computes the vertices and corresponding colours-per-vertex for a quadrilateral
 // drawn from (x1, y1) to (x2, y2)
 // Note: the magic numbers in the vector insert commands should be better documented
 void Renderer::generateBorderTriangles()
 {
-    // make sure array lists are clear to start with
-    triVertices.clear();
-    triColours.clear();
+    long cBufferSize = sizeof(tri_colourList) * sizeof(float);
+    long vBufferSize = sizeof(tri_vertList) * sizeof(float);
+    long nBufferSize = sizeof(tri_normalList) * sizeof(float);
 
-    // add vertices to rectangle list
-    float vectList [] = {
-        0.0, 0.0, 0.0,  // bottom left triangle
-        1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
+    glGenBuffers(1, &this->m_triVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, this->m_triVbo);
 
-        9.0, 0.0, 0.0,  // bottom right triangle
-        10.0, 0.0, 0.0,
-        10.0, 1.0, 0.0,
+    // Allocate buffer
+    glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
 
-        0.0, 19.0, 0.0, // top left triangle
-        1.0, 20.0, 0.0,
-        0.0, 20.0, 0.0,
-
-        10.0, 19.0, 0.0,    // top right triangle
-        10.0, 20.0, 0.0,
-        9.0, 20.0, 0.0 };
-    triVertices.insert(triVertices.end(), vectList, vectList + 3*4*3); // 36 items in array
-
-    // shader supports per-vertex colour; add colour for each vertex add colours to colour list - use current colour
-    QColor borderColour = Qt::red;
-    float colourList [] = { (float)borderColour.redF(), (float)borderColour.greenF(), (float)borderColour.blueF() };
-    float normalList [] = { 0.0f, 0.0f, 1.0f }; // facing viewer
-    for (int v = 0; v < 4 * 3; v++)
-    {
-        triColours.insert(triColours.end(), colourList, colourList + 3); // 3 coordinates per vertex
-        triNormals.insert(triNormals.end(), normalList, normalList + 3); // 3 coordinates per vertex
-    }
-
+    // Upload the data to the GPU
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &tri_vertList[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &tri_colourList[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &tri_normalList[0]);
 }
+
 
 // override mouse press event
 void Renderer::mousePressEvent(QMouseEvent * event)
@@ -199,6 +243,20 @@ void Renderer::mouseReleaseEvent(QMouseEvent * event)
     cout << "Stub: Button " << event->button() << " pressed.\n";
 }
 
+void Renderer::keyPressEvent(QKeyEvent *event)
+{
+    QTextStream cout(stdout);
+    cout << "Stub: Motion at.\n";
+    if (event->key() == int(Qt::Key_Shift))
+        scaling = true;
+}
+
+void Renderer::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == int(Qt::Key_Shift))
+        scaling = false;
+}
+
 // override mouse move event
 void Renderer::mouseMoveEvent(QMouseEvent * event)
 {
@@ -207,18 +265,27 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 
     QPoint deltaPos = (event->pos() - prevMousePos) * 0.5f;
 
-    if (event->buttons() & Qt::LeftButton)
+    if (scaling)
     {
-        rotation.setX(rotation.x() - deltaPos.y());
+        scale += deltaPos.x();
+        if (scale < 0)
+            scale = 0;
     }
-    if (event->buttons() & Qt::MiddleButton)
-    {
-        rotation.setY(rotation.y() - deltaPos.x());
-    }
-    if (event->buttons() & Qt::RightButton)
-    {
-        rotation.setZ(rotation.z() + deltaPos.x());
-    }
+    else
+        if (event->buttons() & Qt::LeftButton)
+        {
+            rotation.setX(rotation.x() + deltaPos.x());
+        }
+    else
+        if (event->buttons() & Qt::MiddleButton)
+        {
+            rotation.setY(rotation.y() + deltaPos.x());
+        }
+    else
+        if (event->buttons() & Qt::RightButton)
+        {
+            rotation.setZ(rotation.z() + deltaPos.x());
+        }
     prevMousePos = event->pos();
     paintGL();
 }
@@ -317,26 +384,31 @@ void Renderer::generateCube(QColor colour)
 
 void Renderer::drawTriangles()
 {
-    // draw border
-    if (triVertices.size() > 0)
-    {
-        // pass in the list of vertices and their associated colours
-        // 3 coordinates per vertex, or per colour
-        glVertexAttribPointer(m_posAttr, 3, GL_FLOAT, GL_FALSE, 0, &triVertices[0]);
-        glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, &triColours[0]);
-        glVertexAttribPointer(m_norAttr, 3, GL_FLOAT, GL_FALSE, 0, &triNormals[0]);
+    long cBufferSize = sizeof(tri_colourList) * sizeof(float);
+    long vBufferSize = sizeof(tri_vertList) * sizeof(float);
+    long nBufferSize = sizeof(tri_normalList) * sizeof(float);
 
-        glEnableVertexAttribArray(m_posAttr);
-        glEnableVertexAttribArray(m_colAttr);
-        glEnableVertexAttribArray(m_norAttr);
+    // Bind to the correct context
+    glBindBuffer(GL_ARRAY_BUFFER, this->m_triVbo);
 
-        // draw triangles
-        glDrawArrays(drawMode, 0, triVertices.size()/3); // 3 coordinates per vertex
+    // Enable the attribute arrays
+    glEnableVertexAttribArray(this->m_posAttr);
+    glEnableVertexAttribArray(this->m_colAttr);
+    glEnableVertexAttribArray(this->m_norAttr);
 
-        glDisableVertexAttribArray(m_norAttr);
-        glDisableVertexAttribArray(m_colAttr);
-        glDisableVertexAttribArray(m_posAttr);
-    }
+    // Specifiy where these are in the VBO
+    glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)0);
+
+    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
+
+    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
+
+    // Draw the triangles
+    glDrawArrays(GL_TRIANGLES, 0, 12); // 12 vertices
+
+    glDisableVertexAttribArray(m_norAttr);
+    glDisableVertexAttribArray(m_colAttr);
+    glDisableVertexAttribArray(m_posAttr);
 }
 
 void Renderer::setGame(Game *game)
@@ -456,7 +528,7 @@ void Renderer::drawBox()
     glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
 
     // Draw the triangles
-    glDrawArrays(GL_QUADS, 0, 24); // 24 vertices
+    glDrawArrays(drawMode, 0, 24); // 24 vertices
 
     glDisableVertexAttribArray(m_norAttr);
     glDisableVertexAttribArray(m_colAttr);
