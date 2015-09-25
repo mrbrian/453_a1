@@ -1,2 +1,6 @@
 moc*.*
 *.o
+*.autosave
+a1
+Makefile
+a1.*

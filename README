@@ -1,0 +1,53 @@
+CPSC453 - Assignment 1
+
+NAME:
+UCID Number:
+Tutorial Section:
+
+=== 1. EXECUTION: ===
+
+To compile the program, on the terminal enter the following commands:
+
+	qmake -project QT+=widgets
+	qmake
+	make
+
+To run the program, on the terminal enter the following command:
+
+	./a1
+
+=== 2. PROGRAM USE: ===
+
+<Insert a precise user manual on how to interact with the program; eg. 
+short-cut keys, mouse movements, menu items, widgets, etc.>
+
+== 3. ALGORITHMS and DESIGN DECISIONS: ===
+
+<Insert a description of the algorithms created and design decisions taken>
+
+=== 4. FILES SUBMITTED: ===
+
+<Insert a list of files that have been submitted by the assignment in case
+there is a discrepancy in the submission>
+
+=== 5. PROGRAM ASSUMPTIONS: ===
+
+<Insert a short description of any assumptions made>
+
+=== 6. DECLARATION AND IMAGE PERMISSION: ===
+
+<Initial the following:>
+
+__ I have read the regulations regarding plagarism. I affirm with my initials
+that I have worked on my own solution to this assignment, and the code I am
+submitting is my own.
+
+<Mark with an X if desired. No marks will be deducted either way>
+
+__ I grant the instructor and/or TAs permission to use images submitted and/or
+   assignment screenshots for future CPSC453 courses.
+
+__ If permission has been granted above, I would prefer the images to remain 
+   annonymous. <Otherwise credit will be given, as is due>
+
+__
