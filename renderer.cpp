@@ -41,6 +41,7 @@ void Renderer::initializeGL()
     m_MMatrixUniform = m_program->uniformLocation("model_matrix");
     m_programID = m_program->programId();
 
+    setupBox();
 }
 
 // called by the Qt GUI system, to allow OpenGL drawing commands
@@ -104,8 +105,6 @@ void Renderer::paintGL()
         model_matrix.translate(offset + cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
-        //generateBorderTriangles();
-
         QColor colors[7] = {
             Qt::black,
             Qt::red,
@@ -118,7 +117,7 @@ void Renderer::paintGL()
 
         generateCube(colors[cell]);
 
-        drawTriangles();
+        drawBox();
     }
     // deactivate the program
     m_program->release();
@@ -360,14 +359,14 @@ void Renderer::drawWalls(QVector3D offset)
         QVector3D cubePos = QVector3D(-1, i, 0.0f);
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-        drawTriangles();
+        drawBox();
 
         // right wall
         cubePos = QVector3D(width, i, 0.0f);
         model_matrix.setToIdentity();
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-        drawTriangles();
+        drawBox();
     }
 
     // draw the well bottom
@@ -379,7 +378,7 @@ void Renderer::drawWalls(QVector3D offset)
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         //generateCube(Qt::gray);
-        drawTriangles();
+        drawBox();
     }
 }
 
@@ -390,12 +389,12 @@ void Renderer::setDrawMode(int mode)
 
 // Define the box's geometry (as triangles), normals, and colour
 const float box_coords[] = {
-    0,1,0,  1,1,0,  0,1,1, 1,1,1,   // top
-    0,0,0,  1,0,0,  0,0,1, 1,0,1,   // bottom
-    0,1,0,  0,0,1,  0,1,1, 0,0,0,   // left
-    1,1,0,  1,0,1,  1,1,1, 1,0,0,   // right
-    1,1,1,  1,0,1,  0,1,1, 0,0,1,   // front
-    1,1,0,  1,0,0,  0,1,0, 0,0,0,   // back
+    0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
+    0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
+    0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
+    1,1,0,  1,1,1,  1,0,1, 1,0,0,   // right
+    0,1,1,  0,0,1,  1,0,1, 1,1,1,   // front
+    1,1,0,  1,0,0,  0,0,0, 0,1,0,   // back
 };
 
 const float box_norms[] = {
