@@ -63,9 +63,6 @@ protected:
     // Called when the mouse moves
     virtual void mouseMoveEvent(QMouseEvent * event);
 
-    virtual void keyPressEvent(QKeyEvent *event);
-    virtual void keyReleaseEvent(QKeyEvent *event);
-
 private:
 
     // member variables for shader manipulation
@@ -77,7 +74,10 @@ private:
     GLuint m_VMatrixUniform; // view matrix
     GLuint m_PMatrixUniform; // projection matrix
 
+    // pointer to border triangles vbo
     GLuint m_triVbo;
+
+    // pointer to box vbo
     GLuint m_boxVbo;
 
     QOpenGLShaderProgram *m_program;
@@ -92,11 +92,12 @@ private:
 
     // helper function for drawing bordering triangles
     void generateBorderTriangles();
-    void generateCube(QColor colour);
     void drawTriangles();
     void drawWalls(QVector3D offset);
+
+    // helper function for initializing a cube
     void setupBox();
-    void drawBox();
+    void drawBox(int cIdx);
 
     Game *game;
 

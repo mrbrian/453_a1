@@ -106,20 +106,7 @@ void Renderer::paintGL()
         model_matrix.translate(offset + cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
-        QColor colors[7] = {
-            Qt::black,
-            Qt::red,
-            Qt::blue,
-            Qt::yellow,
-            Qt::green,
-            Qt::magenta,
-            Qt::cyan
-        };
-
-        generateCube(colors[cell]);
-
-        drawBox();
-
+        drawBox(cell);
     }
 
     QMatrix4x4 b;
@@ -243,20 +230,6 @@ void Renderer::mouseReleaseEvent(QMouseEvent * event)
     cout << "Stub: Button " << event->button() << " pressed.\n";
 }
 
-void Renderer::keyPressEvent(QKeyEvent *event)
-{
-    QTextStream cout(stdout);
-    cout << "Stub: Motion at.\n";
-    if (event->key() == int(Qt::Key_Shift))
-        scaling = true;
-}
-
-void Renderer::keyReleaseEvent(QKeyEvent *event)
-{
-    if (event->key() == int(Qt::Key_Shift))
-        scaling = false;
-}
-
 // override mouse move event
 void Renderer::mouseMoveEvent(QMouseEvent * event)
 {
@@ -295,93 +268,6 @@ void Renderer::resetView()
     rotation = QVector3D(0, 0, 0);
 }
 
-void Renderer::generateCube(QColor colour)
-{
-    // make sure array lists are clear to start with
-    triVertices.clear();
-    triColours.clear();
-
-    // add vertices to triangle list
-    float vectList [] = {
-        // front
-        0.5f, 0.5f, 0.5f,
-        -0.5f, 0.5f, 0.5f,
-        -0.5f, -0.5f, 0.5f,
-
-        -0.5f, -0.5f, 0.5f,
-        0.5f, -0.5f, 0.5f,
-        0.5f, 0.5f, 0.5f,
-
-        // right
-        0.5f, 0.5f, 0.5f,
-        0.5f, -0.5f, 0.5f,
-        0.5f, 0.5f, -0.5f,
-
-        0.5f, -0.5f, 0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, 0.5f, -0.5f,
-
-        // left
-        -0.5f, 0.5f, 0.5f,
-        -0.5f, 0.5f, -0.5f,
-        -0.5f, -0.5f, 0.5f,
-
-        -0.5f, -0.5f, 0.5f,
-        -0.5f, 0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        // up
-        -0.5f, 0.5f, -0.5f,
-        -0.5f, 0.5f, 0.5f,
-        0.5f, 0.5f, -0.5f,
-
-        -0.5f, 0.5f, 0.5f,
-        0.5f, 0.5f, 0.5f,
-        0.5f, 0.5f, -0.5f,
-
-        // down
-        -0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, 0.5f,
-
-        -0.5f, -0.5f, 0.5f,
-        0.5f, -0.5f, -0.5f,
-        0.5f, -0.5f, 0.5f,
-
-        // back
-        -0.5f, 0.5f, -0.5f,
-        0.5f, 0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-        0.5f, 0.5f, -0.5f,
-        0.5f, -0.5f, -0.5f,
-        };
-
-    int numTri = 12;    // number of triangles to draw
-    int numTriVerts = 3;
-
-    triVertices.insert(triVertices.end(), vectList, vectList + numTri * numTriVerts * 3); // 108 items in array
-
-    // shader supports per-vertex colour; add colour for each vertex add colours to colour list - use current colour
-
-    float colourList [] = { (float)colour.redF(), (float)colour.greenF(), (float)colour.blueF() };
-    float normalList [] = {
-        0.0f, 0.0f, 1.0f,       // facing viewer
-        1.0f, 0.0f, 0.0f,       // facing right
-        -1.0f, 0.0f, 0.0f,      // facing left
-        0.0f, 1.0f, 0.0f,       // facing up
-        0.0f, -1.0f, 0.0f,      // facing down
-        0.0f, 0.0f, -1.0f };    // facing back
-
-    for (int v = 0; v < numTri * numTriVerts; v++)
-    {
-        int offset = v / (numTriVerts * 2) * 3;
-        triColours.insert(triColours.end(), colourList, colourList + 3); // 3 coordinates per vertex
-        triNormals.insert(triNormals.end(), normalList + offset, normalList + offset + 3); // 3 coordinates per vertex
-    }
-}
-
 void Renderer::drawTriangles()
 {
     long cBufferSize = sizeof(tri_colourList) * sizeof(float);
@@ -398,9 +284,7 @@ void Renderer::drawTriangles()
 
     // Specifiy where these are in the VBO
     glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)0);
-
     glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
-
     glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
 
     // Draw the triangles
@@ -431,14 +315,14 @@ void Renderer::drawWalls(QVector3D offset)
         QVector3D cubePos = QVector3D(-1, i, 0.0f);
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-        drawBox();
+        drawBox(0);
 
         // right wall
         cubePos = QVector3D(width, i, 0.0f);
         model_matrix.setToIdentity();
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-        drawBox();
+        drawBox(0);
     }
 
     // draw the well bottom
@@ -450,7 +334,7 @@ void Renderer::drawWalls(QVector3D offset)
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         //generateCube(Qt::gray);
-        drawBox();
+        drawBox(0);
     }
 }
 
@@ -478,19 +362,70 @@ const float box_norms[] = {
     0,0,-1,  0,0,-1,  0,0,-1,  0,0,-1,  // back
 };
 
-const float box_cols_green[] = {
+QColor colors[7] = {
+    Qt::black,
+    Qt::red,
+    Qt::blue,
+    Qt::yellow,
+    Qt::green,
+    Qt::magenta,
+    Qt::cyan
+};
+
+const float box_cols[] = {
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
     0,1,0,  0,1,0,  0,1,0,  0,1,0,
     0,1,0,  0,1,0,  0,1,0,  0,1,0,
     0,1,0,  0,1,0,  0,1,0,  0,1,0,
 
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
 };
 
 void Renderer::setupBox()
 {
-    long cBufferSize = sizeof(box_cols_green) * sizeof(float);
+    long cBufferSize = sizeof(box_cols) * sizeof(float);
     long vBufferSize = sizeof(box_coords) * sizeof(float);
     long nBufferSize = sizeof(box_norms) * sizeof(float);
 
@@ -502,13 +437,17 @@ void Renderer::setupBox()
 
     // Upload the data to the GPU
     glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &box_coords[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &box_cols_green[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &box_cols[0]);
     glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &box_norms[0]);
 }
 
-void Renderer::drawBox()
+void Renderer::drawBox(int cIdx)
 {
-    long cBufferSize = sizeof(box_cols_green) * sizeof(float);
+    int verts= 4;
+    int quads= 6;
+    int floats= 3;
+
+    long cBufferSize = sizeof(box_cols) * sizeof(float);
     long vBufferSize = sizeof(box_coords) * sizeof(float);
     long nBufferSize = sizeof(box_norms) * sizeof(float);
 
@@ -522,12 +461,10 @@ void Renderer::drawBox()
 
     // Specifiy where these are in the VBO
     glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)0);
-
-    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize));
-
+    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + sizeof(float) * floats * verts * quads * cIdx));
     glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
 
-    // Draw the triangles
+    // Draw the faces
     glDrawArrays(drawMode, 0, 24); // 24 vertices
 
     glDisableVertexAttribArray(m_norAttr);
