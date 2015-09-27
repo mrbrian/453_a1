@@ -77,7 +77,7 @@ private:
     // timer for calling update function
     QTimer * timer;
     bool autoSpeed;
-    float tickSpeed;
+    int tickSpeed;
     Game * game;
     // helper function for creating actions
     void createActions();

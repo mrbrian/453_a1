@@ -101,11 +101,11 @@ private:
 
     // helper functions for drawing/saving corner triangles to VBO
     void generateBorderTriangles();    
-    void drawTriangles(QVector3D offset);
+    void drawTriangles(QMatrix4x4 * transform);
 
     // helper functions for drawing the game walls/game board
-    void drawWalls(QVector3D offset);
-    void drawGame(QVector3D offset);
+    void drawWalls(QMatrix4x4 * transform);
+    void drawGame(QMatrix4x4 * transform);
 
     // helper functions for drawing/initializing a cube
     void setupBox();

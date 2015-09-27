@@ -173,10 +173,6 @@ void Renderer::paintGL()
     QMatrix4x4 view_matrix;
     view_matrix.translate(0.0f, 0.0f, -40.0f);
 
-    view_matrix.rotate(rotation.x(), 1, 0, 0);
-    view_matrix.rotate(rotation.y(), 0, 1, 0);
-    view_matrix.rotate(rotation.z(), 0, 0, 1);
-
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
     // Not implemented: set up lighting (if necessary)
@@ -185,12 +181,21 @@ void Renderer::paintGL()
     // 10 and height 24 (game = 20, stripe = 4).  Let's translate
     // the game so that we can draw it starting at (0,0) but have
     // it appear centered in the window.
+
     QVector3D offset = QVector3D(-5.0f, -12.0f, 0.0f);
 
+    // generating the composition of transform functions  Rz * Ry * Rx * Scale * Translate
+    QMatrix4x4 transform;
+    transform.rotate(rotation.z(), 0, 0, 1);
+    transform.rotate(rotation.y(), 0, 1, 0);
+    transform.rotate(rotation.x(), 1, 0, 0);
+    transform.scale(scale);
+    transform.translate(offset);
+
     // draw the game board + walls + border triangles
-    drawWalls(offset);
-    drawGame(offset);
-    drawTriangles(offset);
+    drawWalls(&transform);
+    drawGame(&transform);
+    drawTriangles(&transform);
 
     // deactivate the program
     m_program->release();
@@ -324,24 +329,23 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
             scale = 0;
     }
     else
+    {
         if (event->buttons() & Qt::LeftButton)      // LB rotates along x-axis
         {
             rotation.setX(rotation.x() + deltaPos.x());
             rotationVel.setX(deltaPos.x());
         }
-    else
         if (event->buttons() & Qt::MiddleButton)    // MB rotates along y-axis
         {
             rotation.setY(rotation.y() + deltaPos.x());
             rotationVel.setY(deltaPos.x());
         }
-    else
         if (event->buttons() & Qt::RightButton)     // RB rotates along z-axis
         {
             rotation.setZ(rotation.z() + deltaPos.x());
             rotationVel.setZ(deltaPos.x());
         }
-
+    }
     prevMousePos = event->pos();
 
     // repaint scene
@@ -356,11 +360,9 @@ void Renderer::resetView()
 }
 
 // helper function, draw corner triangles
-void Renderer::drawTriangles(QVector3D offset)
+void Renderer::drawTriangles(QMatrix4x4 * transform)
 {
-    QMatrix4x4 model_matrix;
-    model_matrix.scale(scale);
-    model_matrix.translate(offset);
+    QMatrix4x4 model_matrix = *transform;
     glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
     long cBufferSize = sizeof(tri_colourList) * sizeof(float);
@@ -401,7 +403,7 @@ void Renderer::setIsScaling(bool val)
 }
 
 // draws all cubes for the "well"
-void Renderer::drawWalls(QVector3D offset)
+void Renderer::drawWalls(QMatrix4x4 * transform)
 {
     int width = game->getWidth();
     int height = game->getHeight();
@@ -410,20 +412,18 @@ void Renderer::drawWalls(QVector3D offset)
     // draw the well sides
     for (i = -1; i < height; i++)
     {
-        QMatrix4x4 model_matrix;
+        QMatrix4x4 model_matrix = *transform;
 
         // left wall
         QVector3D cubePos = QVector3D(-1, i, 0.0f);
-        model_matrix.scale(scale);
-        model_matrix.translate(cubePos + offset);
+        model_matrix.translate(cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
 
         // right wall
         cubePos = QVector3D(width, i, 0.0f);
-        model_matrix.setToIdentity();
-        model_matrix.scale(scale);
-        model_matrix.translate(cubePos + offset);
+        model_matrix = *transform;
+        model_matrix.translate(cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
     }
@@ -431,17 +431,16 @@ void Renderer::drawWalls(QVector3D offset)
     // draw the well bottom
     for (i = 0; i < width ; i++)
     {
-        QMatrix4x4 model_matrix;
+        QMatrix4x4 model_matrix = *transform;
 
         QVector3D cubePos = QVector3D(i, -1, 0.0f);
-        model_matrix.scale(scale);
-        model_matrix.translate(cubePos + offset);
+        model_matrix.translate(cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
     }
 }
 
-void Renderer::drawGame(QVector3D offset)
+void Renderer::drawGame(QMatrix4x4 * transform)
 {
     int width = game->getWidth();
     int height = game->getHeight();
@@ -452,7 +451,7 @@ void Renderer::drawGame(QVector3D offset)
     {
         int r = i / width;
         int c = i % width;
-        QMatrix4x4 model_matrix;
+        QMatrix4x4 model_matrix = *transform;
 
         int cell = game->get(r, c);
 
@@ -461,8 +460,7 @@ void Renderer::drawGame(QVector3D offset)
 
         QVector3D cubePos = QVector3D(c, r, 0.0f);
 
-        model_matrix.scale(scale);
-        model_matrix.translate(offset + cubePos);
+        model_matrix.translate(cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
         drawBox(cell);
