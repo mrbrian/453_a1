@@ -164,7 +164,6 @@ void Renderer::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set the current shader program
-
     glUseProgram(m_programID);
 
     // Modify the current projection matrix so that we move the
@@ -189,10 +188,9 @@ void Renderer::paintGL()
     // it appear centered in the window.
     QVector3D offset = QVector3D(-5.0f, -12.0f, 0.0f);
 
-    // draw the game board + walls
+    // draw the game board + walls + border triangles
     drawWalls(offset);
     drawGame(offset);
-
     drawTriangles(offset);
 
     // deactivate the program
@@ -216,7 +214,6 @@ void Renderer::resizeGL(int w, int h)
     glUniformMatrix4fv(m_PMatrixUniform, 1, false, projection_matrix.data());
 
     glViewport(0, 0, width(), height());
-
 }
 
 // add vertices to rectangle list
@@ -317,8 +314,10 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
     QTextStream cout(stdout);
     cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
 
-    QPoint deltaPos = (event->pos() - prevMousePos);
-    rotationVel *= 0;
+    rotationVel *= 0;   // initialize rotation velocity
+
+    QPoint deltaPos = (event->pos() - prevMousePos);    // calculate movement
+
     if (isScaling)
     {
         scale -= ((float)deltaPos.x()) / 50.0;
@@ -326,24 +325,27 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
             scale = 0;
     }
     else
-        if (event->buttons() & Qt::LeftButton)
+        if (event->buttons() & Qt::LeftButton)      // LB rotates along x-axis
         {
             rotation.setX(rotation.x() + deltaPos.x());
             rotationVel.setX(deltaPos.x());
         }
     else
-        if (event->buttons() & Qt::MiddleButton)
+        if (event->buttons() & Qt::MiddleButton)    // MB rotates along y-axis
         {
             rotation.setY(rotation.y() + deltaPos.x());
             rotationVel.setY(deltaPos.x());
         }
     else
-        if (event->buttons() & Qt::RightButton)
+        if (event->buttons() & Qt::RightButton)     // RB rotates along z-axis
         {
             rotation.setZ(rotation.z() + deltaPos.x());
             rotationVel.setZ(deltaPos.x());
         }
+
     prevMousePos = event->pos();
+
+    // repaint scene
     update();
 }
 
@@ -354,11 +356,12 @@ void Renderer::resetView()
     rotationVel = QVector3D(0, 0, 0);
 }
 
+// helper function, draw corner triangles
 void Renderer::drawTriangles(QVector3D offset)
 {
-    QMatrix4x4 m;
-    m.translate(offset);
-    glUniformMatrix4fv(m_MMatrixUniform, 1, false, m.data());
+    QMatrix4x4 model_matrix;
+    model_matrix.translate(offset);
+    glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
     long cBufferSize = sizeof(tri_colourList) * sizeof(float);
     long vBufferSize = sizeof(tri_vertList) * sizeof(float);
@@ -472,6 +475,7 @@ void Renderer::setDrawMode(int mode)
     drawMode = mode;
 }
 
+// Saves all the cube info to the VBO
 void Renderer::setupBox()
 {
     long cBufferSize = sizeof(box_cols) * sizeof(float);
@@ -490,6 +494,7 @@ void Renderer::setupBox()
     glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &box_norms[0]);
 }
 
+// Draw a unit cube and use colors stored at position cIdx
 void Renderer::drawBox(int cIdx)
 {
     int glDrawMode = 0;
@@ -540,10 +545,9 @@ void Renderer::drawBox(int cIdx)
     glDisableVertexAttribArray(m_posAttr);
 }
 
-
+// updates the continuous spin, and repaints widget
 void Renderer::update()
 {
-    rotation += rotationVel;    
-    paintGL();
+    rotation += rotationVel;
     QOpenGLWidget::update();
 }
