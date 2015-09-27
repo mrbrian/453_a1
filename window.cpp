@@ -51,9 +51,10 @@ Window::Window(QWidget *parent) :
 
     // Setup the game timer
     timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(gameUpdate()));
     tickSpeed = INIT_TICK_SPEED;
-    timer->start(tickSpeed);    
+    timer->start(INIT_TICK_SPEED);
+
 
     // Setup the quit button
     scoreLabel = new QLabel(this);
@@ -150,14 +151,20 @@ void Window::newGame()
 // Game updating function
 void Window::update()
 {
-    score += game->tick();    
+    renderer->update();
+    QMainWindow::update();
+}
+
+// Game updating function
+void Window::gameUpdate()
+{
+    score += game->tick();
     if (autoSpeed)
     {
         tickSpeed = std::max(25, 500 - (score * 100));
         timer->setInterval(tickSpeed);
     }
     scoreLabel->setText("Score: " + QString::number(score));
-    renderer->update();
 }
 
 void Window::incSpeed()

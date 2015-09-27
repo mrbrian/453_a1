@@ -38,6 +38,8 @@ public:
 private slots:
     // game update function
     void update();
+    void gameUpdate();
+
     // restarts the game
     void newGame();
     void setDrawMode(QAction * action);
@@ -74,8 +76,9 @@ private:
 
     QLabel * scoreLabel;
 
-    // timer for calling update function
+    // timer for calling game update function
     QTimer * timer;
+
     bool autoSpeed;
     int tickSpeed;
     Game * game;

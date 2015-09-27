@@ -17,6 +17,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLShader>
 #include <QMouseEvent>
+#include <QTimer>
 
 using namespace std;
 
@@ -38,14 +39,12 @@ public:
     void setIsScaling(bool val);
     void setDrawMode(int mode);
 
-    virtual void update();
-
-
     static const int DRAW_WIRE  = 0;
     static const int DRAW_FACES = 1;
     static const int DRAW_MULTI = 2;
 
 public slots:
+    void update();
     void resetView();
 
 protected:
@@ -117,11 +116,13 @@ private:
     // 0 = wireframe, 1 = face, 2 = multicolour
     int drawMode;
 
+    bool mouseDown;
     bool isScaling;
     float scale;
     QPoint prevMousePos;
     QVector3D rotation;
     QVector3D rotationVel;
+    QTimer * renderTimer;
 };
 
 #endif // RENDERER_H

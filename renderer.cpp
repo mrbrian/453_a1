@@ -3,6 +3,9 @@
 #include <QOpenGLBuffer>
 #include <cmath>
 
+#define FPS             60.0
+#define TIME_PER_FRAME  1.0/FPS
+
 // color indexes
 #define GRAY_IDX  7
 #define BLACK_IDX 8
@@ -115,6 +118,13 @@ Renderer::Renderer(QWidget *parent)
 {
     drawMode = DRAW_FACES;
     scale = 1;
+    isScaling = false;
+    mouseDown = false;
+
+    // timer for calling renderer update function
+    renderTimer = new QTimer(this);
+    connect(renderTimer, SIGNAL(timeout()), this, SLOT(update()));
+    renderTimer->start(TIME_PER_FRAME);
 }
 
 // constructor
@@ -299,8 +309,11 @@ void Renderer::generateBorderTriangles()
 // override mouse press event
 void Renderer::mousePressEvent(QMouseEvent * event)
 {
+    mouseDown = true;
     QTextStream cout(stdout);
     cout << "Stub: Button " << event->button() << " pressed.\n";
+
+    rotationVel *= 0;   // reset rotation velocity
 
     prevMousePos = event->pos();
 }
@@ -308,8 +321,10 @@ void Renderer::mousePressEvent(QMouseEvent * event)
 // override mouse release event
 void Renderer::mouseReleaseEvent(QMouseEvent * event)
 {
+    mouseDown = false;
     QTextStream cout(stdout);
     cout << "Stub: Button " << event->button() << " pressed.\n";
+    cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
 }
 
 // override mouse move event
@@ -318,10 +333,9 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
     QTextStream cout(stdout);
     cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
 
-    rotationVel *= 0;   // initialize rotation velocity
-
     QPoint deltaPos = (event->pos() - prevMousePos);    // calculate movement
 
+    float spinScale = 1 / 10.0;
     if (isScaling)
     {
         scale -= ((float)deltaPos.x()) / 50.0;  // slow down the scaling rate
@@ -332,24 +346,21 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
     {
         if (event->buttons() & Qt::LeftButton)      // LB rotates along x-axis
         {
-            rotation.setX(rotation.x() + deltaPos.x());
-            rotationVel.setX(deltaPos.x());
+            rotation.setX(rotation.x() + deltaPos.x() * spinScale);
+            rotationVel.setX(deltaPos.x() * spinScale);
         }
         if (event->buttons() & Qt::MiddleButton)    // MB rotates along y-axis
         {
-            rotation.setY(rotation.y() + deltaPos.x());
-            rotationVel.setY(deltaPos.x());
+            rotation.setY(rotation.y() + deltaPos.x() * spinScale);
+            rotationVel.setY(deltaPos.x() * spinScale);
         }
         if (event->buttons() & Qt::RightButton)     // RB rotates along z-axis
         {
-            rotation.setZ(rotation.z() + deltaPos.x());
-            rotationVel.setZ(deltaPos.x());
+            rotation.setZ(rotation.z() + deltaPos.x() * spinScale);
+            rotationVel.setZ(deltaPos.x() * spinScale);
         }
     }
     prevMousePos = event->pos();
-
-    // repaint scene
-    update();
 }
 
 // resets the renderer current view
@@ -546,6 +557,9 @@ void Renderer::drawBox(int cIdx)
 // updates the continuous spin, and repaints widget
 void Renderer::update()
 {
-    rotation += rotationVel;
+    if (!mouseDown)
+    {
+        rotation += rotationVel;
+    }
     QOpenGLWidget::update();
 }
