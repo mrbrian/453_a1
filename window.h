@@ -74,17 +74,24 @@ private:
     QAction * mSlowDownAction;
     QAction * mAutoIncAction;
 
+    // timer for calling game update function
+    QTimer * gameTimer;
+
+    // auto speed increasing flag
+    bool autoSpeed;
+
+    // current game tick speed
+    int tickSpeed;
+
+    // Game reference
+    Game * game;
+
+    // Game score & score UI label
+    int score;
     QLabel * scoreLabel;
 
-    // timer for calling game update function
-    QTimer * timer;
-
-    bool autoSpeed;
-    int tickSpeed;
-    Game * game;
     // helper function for creating actions
     void createActions();
-    int score;
 };
 
 #endif // WINDOW_H

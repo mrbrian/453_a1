@@ -50,18 +50,19 @@ Window::Window(QWidget *parent) :
     renderer->setGame(game);
 
     // Setup the game timer
-    timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(gameUpdate()));
+    gameTimer = new QTimer(this);
+    connect(gameTimer, SIGNAL(timeout()), this, SLOT(gameUpdate()));
     tickSpeed = INIT_TICK_SPEED;
-    timer->start(INIT_TICK_SPEED);
+    gameTimer->start(INIT_TICK_SPEED);
 
+    autoSpeed = false;
 
+    score = 0;
     // Setup the quit button
     scoreLabel = new QLabel(this);
     //connect(quitButton, SIGNAL(clicked()), qApp, SLOT(quit()));
 
     // Add quit button
-    score = 0;
     layout->addWidget(scoreLabel);
     scoreLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     scoreLabel->setText("Score: 0");
@@ -162,7 +163,7 @@ void Window::gameUpdate()
     if (autoSpeed)
     {
         tickSpeed = std::max(25, 500 - (score * 100));
-        timer->setInterval(tickSpeed);
+        gameTimer->setInterval(tickSpeed);
     }
     scoreLabel->setText("Score: " + QString::number(score));
 }
@@ -171,28 +172,28 @@ void Window::incSpeed()
 {
     tickSpeed -= 50;
     tickSpeed = std::max(25, tickSpeed - 50);
-    timer->setInterval(tickSpeed);
+    gameTimer->setInterval(tickSpeed);
 }
 
 void Window::toggleAutoSpeed()
 {
     autoSpeed = true;
     tickSpeed = std::max(25, 500 - (score * 50));
-    timer->setInterval(tickSpeed);
+    gameTimer->setInterval(tickSpeed);
 }
 
 void Window::decSpeed()
 {
     tickSpeed += 50;
-    timer->setInterval(tickSpeed);
+    gameTimer->setInterval(tickSpeed);
 }
 
 void Window::pause()
 {
-    if (!timer->isActive())
-        timer->start(tickSpeed);
+    if (!gameTimer->isActive())
+        gameTimer->start(tickSpeed);
     else
-        timer->stop();
+        gameTimer->stop();
 }
 
 void Window::keyPressEvent(QKeyEvent *event)

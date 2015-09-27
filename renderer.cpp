@@ -12,7 +12,7 @@
 #define MULTI_IDX 9
 
 // Define the box's geometry (as quads)
-const float box_coords[] = {
+const float box_co2ords[] = {
     0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
     0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
     0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
@@ -21,14 +21,24 @@ const float box_coords[] = {
     1,1,0,  1,0,0,  0,0,0, 0,1,0,   // back
 };
 
+// Define the box's geometry (as quads)
+const float box_coords[] = {
+    0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
+    0,1,0,  1,1,0,  1,0,0, 0,0,0,   // back
+    0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
+    0,1,1,  0,0,1,  1,0,1, 1,1,1,   // front
+    1,1,0,  1,1,1,  1,0,1, 1,0,0,   // right
+    0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
+};
+
 // box normals
 const float box_norms[] = {
     0,1,0,   0,1,0,   0,1,0,   0,1,0,   // top
-    0,-1,0,  0,-1,0,  0,-1,0,  0,-1,0,  // bottom
-    -1,0,0,  -1,0,0,  -1,0,0,  -1,0,0,  // left
-    1,0,0,   1,0,0,   1,0,0,   1,0,0,   // right
-    0,0,1,   0,0,1,   0,0,1,   0,0,1,   // front
     0,0,-1,  0,0,-1,  0,0,-1,  0,0,-1,  // back
+    -1,0,0,  -1,0,0,  -1,0,0,  -1,0,0,  // left
+    0,0,1,   0,0,1,   0,0,1,   0,0,1,   // front
+    1,0,0,   1,0,0,   1,0,0,   1,0,0,   // right
+    0,-1,0,  0,-1,0,  0,-1,0,  0,-1,0,  // bottom
 };
 
 // all box colours
@@ -532,7 +542,7 @@ void Renderer::drawBox(int cIdx)
     {
         case DRAW_WIRE:     // wireframe
             cBufferOffset = sizeof(float) * floats * verts * quads * BLACK_IDX; // draw lines in black
-            glDrawMode = GL_LINES;
+            glDrawMode = GL_LINE_STRIP;
             break;
         case DRAW_FACES:
             cBufferOffset = sizeof(float) * floats * verts * quads * cIdx;
