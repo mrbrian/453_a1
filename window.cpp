@@ -1,6 +1,8 @@
 #include "window.h"
 #include "renderer.h"
 
+#define INIT_TICK_SPEED 500
+
 Window::Window(QWidget *parent) :
     QMainWindow(parent)
 {
@@ -50,7 +52,7 @@ Window::Window(QWidget *parent) :
     // Setup the game timer
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    tickSpeed = 500;
+    tickSpeed = INIT_TICK_SPEED;
     timer->start(tickSpeed);
 }
 
@@ -126,6 +128,7 @@ Window::~Window()
 // Restarts the game
 void Window::newGame()
 {
+    tickSpeed = INIT_TICK_SPEED;
     game->reset();
 }
 
@@ -138,18 +141,20 @@ void Window::update()
 
 void Window::incSpeed()
 {
-    tickSpeed += 100;
+    tickSpeed -= 50;
+    timer->setInterval(tickSpeed);
 }
 
 void Window::decSpeed()
 {
-    tickSpeed -= 100;
+    tickSpeed += 50;
+    timer->setInterval(tickSpeed);
 }
 
 void Window::pause()
 {
     if (!timer->isActive())
-        timer->start(500);
+        timer->start(tickSpeed);
     else
         timer->stop();
 }

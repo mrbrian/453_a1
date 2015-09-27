@@ -99,18 +99,24 @@ private:
     // helper function for loading shaders
     GLuint loadShader(GLenum type, const char *source);
 
-    // helper function for drawing bordering triangles
-    void generateBorderTriangles();
+    // helper functions for drawing/saving corner triangles to VBO
+    void generateBorderTriangles();    
     void drawTriangles();
-    void drawWalls(QVector3D offset);
 
-    // helper function for initializing a cube
+    // helper functions for drawing the game walls/game board
+    void drawWalls(QVector3D offset);
+    void drawGame(QVector3D offset);
+
+    // helper functions for drawing/initializing a cube
     void setupBox();
     void drawBox(int cIdx);
 
     Game *game;
 
+    // keep track of which renderering mode to draw
+    // 0 = wireframe, 1 = face, 2 = multicolour
     int drawMode;
+
     bool isScaling;
     float scale;
     QPoint prevMousePos;

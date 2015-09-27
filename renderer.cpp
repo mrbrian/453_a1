@@ -167,22 +167,18 @@ void Renderer::paintGL()
 
     glUseProgram(m_programID);
 
-    QMatrix4x4 cameraTransformation;
-    cameraTransformation.rotate(rotation.x(), 1, 0, 0);
-    cameraTransformation.rotate(rotation.y(), 0, 1, 0);
-    cameraTransformation.rotate(rotation.z(), 0, 0, 1);
-    cameraTransformation.scale(scale);
-
-    QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, 40);
-    QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
-
     // Modify the current projection matrix so that we move the
     // camera away from the origin.  We'll draw the game at the
     // origin, and we need to back up to see it.
 
     QMatrix4x4 view_matrix;
-    //view_matrix.translate(0.0f, 0.0f, -40.0f);
-    view_matrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
+    view_matrix.translate(0.0f, 0.0f, -40.0f);
+
+    view_matrix.rotate(rotation.x(), 1, 0, 0);
+    view_matrix.rotate(rotation.y(), 0, 1, 0);
+    view_matrix.rotate(rotation.z(), 0, 0, 1);
+    view_matrix.scale(scale);
+
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
     // Not implemented: set up lighting (if necessary)
@@ -198,26 +194,7 @@ void Renderer::paintGL()
 
     drawWalls(offset);
 
-    int i = 0;
-    // draw block in each spot
-    for (i = 0; i < width * (height + 4); i++)
-    {
-        int r = i / width;
-        int c = i % width;
-        QMatrix4x4 model_matrix;
-
-        int cell = game->get(r, c);
-
-        if (cell == -1)
-            continue;
-
-        QVector3D cubePos = QVector3D(c, r, 0.0f);
-
-        model_matrix.translate(offset + cubePos);
-        glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-
-        drawBox(cell);
-    }
+    drawGame(offset);
 
     QMatrix4x4 b;
     b.translate(offset);
@@ -380,6 +357,7 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 void Renderer::resetView()
 {
     rotation = QVector3D(0, 0, 0);
+    rotationVel = QVector3D(0, 0, 0);
 }
 
 void Renderer::drawTriangles()
@@ -436,6 +414,7 @@ void Renderer::drawWalls(QVector3D offset)
         // left wall
         QVector3D cubePos = QVector3D(-1, i, 0.0f);
         model_matrix.translate(cubePos + offset);
+        model_matrix.scale(scale);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
 
@@ -443,6 +422,7 @@ void Renderer::drawWalls(QVector3D offset)
         cubePos = QVector3D(width, i, 0.0f);
         model_matrix.setToIdentity();
         model_matrix.translate(cubePos + offset);
+        model_matrix.scale(scale);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
     }
@@ -454,8 +434,37 @@ void Renderer::drawWalls(QVector3D offset)
 
         QVector3D cubePos = QVector3D(i, -1, 0.0f);
         model_matrix.translate(cubePos + offset);
+        model_matrix.scale(scale);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
+    }
+}
+
+void Renderer::drawGame(QVector3D offset)
+{
+    int width = game->getWidth();
+    int height = game->getHeight();
+
+    int i = 0;
+    // draw block in each spot
+    for (i = 0; i < width * (height + 4); i++)
+    {
+        int r = i / width;
+        int c = i % width;
+        QMatrix4x4 model_matrix;
+
+        int cell = game->get(r, c);
+
+        if (cell == -1)
+            continue;
+
+        QVector3D cubePos = QVector3D(c, r, 0.0f);
+
+        model_matrix.translate(offset + cubePos);
+        model_matrix.scale(scale);
+        glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
+
+        drawBox(cell);
     }
 }
 
