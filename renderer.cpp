@@ -176,7 +176,6 @@ void Renderer::paintGL()
     view_matrix.rotate(rotation.x(), 1, 0, 0);
     view_matrix.rotate(rotation.y(), 0, 1, 0);
     view_matrix.rotate(rotation.z(), 0, 0, 1);
-    view_matrix.scale(scale);
 
     glUniformMatrix4fv(m_VMatrixUniform, 1, false, view_matrix.data());
 
@@ -236,7 +235,7 @@ const float tri_vertList [] = {
 
 float tri_colourList [] = {
     1, 0, 0,
-    1, 0, 0,
+    1, 0, 0,    // all red verts
     1, 0, 0,
 
     1, 0, 0,
@@ -321,7 +320,7 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
     if (isScaling)
     {
         scale -= ((float)deltaPos.x()) / 50.0;
-        if (scale < 0)
+        if (scale < 0)      // prevent negative scaling
             scale = 0;
     }
     else
@@ -360,6 +359,7 @@ void Renderer::resetView()
 void Renderer::drawTriangles(QVector3D offset)
 {
     QMatrix4x4 model_matrix;
+    model_matrix.scale(scale);
     model_matrix.translate(offset);
     glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
@@ -414,16 +414,16 @@ void Renderer::drawWalls(QVector3D offset)
 
         // left wall
         QVector3D cubePos = QVector3D(-1, i, 0.0f);
-        model_matrix.translate(cubePos + offset);
         model_matrix.scale(scale);
+        model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
 
         // right wall
         cubePos = QVector3D(width, i, 0.0f);
         model_matrix.setToIdentity();
-        model_matrix.translate(cubePos + offset);
         model_matrix.scale(scale);
+        model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
     }
@@ -434,8 +434,8 @@ void Renderer::drawWalls(QVector3D offset)
         QMatrix4x4 model_matrix;
 
         QVector3D cubePos = QVector3D(i, -1, 0.0f);
-        model_matrix.translate(cubePos + offset);
         model_matrix.scale(scale);
+        model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
     }
@@ -461,8 +461,8 @@ void Renderer::drawGame(QVector3D offset)
 
         QVector3D cubePos = QVector3D(c, r, 0.0f);
 
-        model_matrix.translate(offset + cubePos);
         model_matrix.scale(scale);
+        model_matrix.translate(offset + cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
         drawBox(cell);
