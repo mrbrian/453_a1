@@ -53,7 +53,17 @@ Window::Window(QWidget *parent) :
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     tickSpeed = INIT_TICK_SPEED;
-    timer->start(tickSpeed);
+    timer->start(tickSpeed);    
+
+    // Setup the quit button
+    scoreLabel = new QLabel(this);
+    //connect(quitButton, SIGNAL(clicked()), qApp, SLOT(quit()));
+
+    // Add quit button
+    layout->addWidget(scoreLabel);
+    scoreLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    scoreLabel->setText("Score: 0");
+    scoreLabel->setAlignment(Qt::AlignBottom | Qt::AlignRight);
 }
 
 // helper function for creating actions
@@ -128,6 +138,7 @@ Window::~Window()
 // Restarts the game
 void Window::newGame()
 {
+    score = 0;
     tickSpeed = INIT_TICK_SPEED;
     game->reset();
 }
@@ -135,7 +146,7 @@ void Window::newGame()
 // Game updating function
 void Window::update()
 {
-    game->tick();
+    score += game->tick();
     renderer->update();
 }
 

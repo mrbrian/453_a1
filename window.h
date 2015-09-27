@@ -13,6 +13,7 @@
 #include <QApplication>
 #include <QMenuBar>
 #include <QAction>
+#include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -69,12 +70,15 @@ private:
     QAction * mSlowDownAction;
     QAction * mAutoIncAction;
 
+    QLabel * scoreLabel;
+
     // timer for calling update function
     QTimer * timer;
     float tickSpeed;
     Game * game;
     // helper function for creating actions
     void createActions();
+    int score;
 };
 
 #endif // WINDOW_H
