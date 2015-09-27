@@ -60,6 +60,7 @@ Window::Window(QWidget *parent) :
     //connect(quitButton, SIGNAL(clicked()), qApp, SLOT(quit()));
 
     // Add quit button
+    score = 0;
     layout->addWidget(scoreLabel);
     scoreLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     scoreLabel->setText("Score: 0");
@@ -113,20 +114,23 @@ void Window::createActions()
     mPauseAction->setStatusTip(tr("Pause game"));
     connect(mPauseAction, SIGNAL(triggered()), this, SLOT(pause()));
 
+    // Speed up the gameplay
     mSpeedUpAction = new QAction(tr("&Speed Up"), this);
     mSpeedUpAction->setShortcut(QKeySequence(Qt::Key_PageUp));
     mSpeedUpAction->setStatusTip(tr("Increase the speed of the game play"));
     connect(mSpeedUpAction, SIGNAL(triggered()), this, SLOT(incSpeed()));
 
+    // Slow down the gameplay
     mSlowDownAction = new QAction(tr("&Speed Down"), this);
     mSlowDownAction->setShortcut(QKeySequence(Qt::Key_PageDown));
     mSlowDownAction->setStatusTip(tr("Decrease the speed of the game play"));
     connect(mSlowDownAction, SIGNAL(triggered()), this, SLOT(decSpeed()));
 
+    // Auto increase difficulty
     mAutoIncAction = new QAction(tr("&Auto-Increase"), this);
     mAutoIncAction->setShortcut(QKeySequence(Qt::Key_A));
     mAutoIncAction->setStatusTip(tr("Automatically increase the speed"));
-    connect(mAutoIncAction, SIGNAL(triggered()), this, SLOT(decSpeed()));
+    connect(mAutoIncAction, SIGNAL(triggered()), this, SLOT(toggleAutoSpeed()));
 }
 
 // destructor
@@ -146,13 +150,27 @@ void Window::newGame()
 // Game updating function
 void Window::update()
 {
-    score += game->tick();
+    score += game->tick();    
+    if (autoSpeed)
+    {
+        tickSpeed = std::max(25, 500 - (score * 100));
+        timer->setInterval(tickSpeed);
+    }
+    scoreLabel->setText("Score: " + QString::number(score));
     renderer->update();
 }
 
 void Window::incSpeed()
 {
     tickSpeed -= 50;
+    tickSpeed = std::max(25, tickSpeed - 50);
+    timer->setInterval(tickSpeed);
+}
+
+void Window::toggleAutoSpeed()
+{
+    autoSpeed = true;
+    tickSpeed = std::max(25, 500 - (score * 50));
     timer->setInterval(tickSpeed);
 }
 
@@ -172,22 +190,29 @@ void Window::pause()
 
 void Window::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == int(Qt::Key_Shift))
-        renderer->setIsScaling(true);
-    else if (event->key() == int(Qt::Key_Left))
-        game->moveLeft();
-    else if (event->key() == int(Qt::Key_Right))
-        game->moveRight();
-    else if (event->key() == int(Qt::Key_Up))
-        game->rotateCCW();
-    else if (event->key() == int(Qt::Key_Down))
-        game->rotateCW();
-    else if (event->key() == int(Qt::Key_Space))
-        game->drop();
-    else
+    switch (event->key())
     {
-        QMainWindow::keyPressEvent(event);
-        return;
+        case int(Qt::Key_Shift):
+            renderer->setIsScaling(true);
+            break;
+        case int(Qt::Key_Left):
+            game->moveLeft();
+            break;
+        case int(Qt::Key_Right):
+            game->moveRight();
+            break;
+        case int(Qt::Key_Up):
+            game->rotateCCW();
+            break;
+        case int(Qt::Key_Down):
+            game->rotateCW();
+            break;
+        case int(Qt::Key_Space):
+            game->drop();
+            break;
+        default:
+            QMainWindow::keyPressEvent(event);
+            return;
     }
     renderer->update();
 }

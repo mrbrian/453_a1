@@ -44,10 +44,12 @@ private slots:
     void pause();
     void incSpeed();
     void decSpeed();
-protected:
+    void toggleAutoSpeed();
 
+protected:
     virtual void keyPressEvent(QKeyEvent * event);
     virtual void keyReleaseEvent(QKeyEvent * event);
+
 private:
     // Main widget for drawing
     Renderer *renderer;
@@ -74,6 +76,7 @@ private:
 
     // timer for calling update function
     QTimer * timer;
+    bool autoSpeed;
     float tickSpeed;
     Game * game;
     // helper function for creating actions

@@ -319,8 +319,8 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 
     if (isScaling)
     {
-        scale -= ((float)deltaPos.x()) / 50.0;
-        if (scale < 0)      // prevent negative scaling
+        scale -= ((float)deltaPos.x()) / 50.0;  // slow down the scaling rate
+        if (scale < 0)  // prevent negative scaling
             scale = 0;
     }
     else
