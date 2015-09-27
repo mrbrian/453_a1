@@ -3,11 +3,117 @@
 #include <QOpenGLBuffer>
 #include <cmath>
 
+// color indexes
+#define GRAY_IDX  7
+#define BLACK_IDX 8
+#define MULTI_IDX 9
+
+// Define the box's geometry (as quads)
+const float box_coords[] = {
+    0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
+    0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
+    0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
+    1,1,0,  1,1,1,  1,0,1, 1,0,0,   // right
+    0,1,1,  0,0,1,  1,0,1, 1,1,1,   // front
+    1,1,0,  1,0,0,  0,0,0, 0,1,0,   // back
+};
+
+// box normals
+const float box_norms[] = {
+    0,1,0,   0,1,0,   0,1,0,   0,1,0,   // top
+    0,-1,0,  0,-1,0,  0,-1,0,  0,-1,0,  // bottom
+    -1,0,0,  -1,0,0,  -1,0,0,  -1,0,0,  // left
+    1,0,0,   1,0,0,   1,0,0,   1,0,0,   // right
+    0,0,1,   0,0,1,   0,0,1,   0,0,1,   // front
+    0,0,-1,  0,0,-1,  0,0,-1,  0,0,-1,  // back
+};
+
+// all box colours
+const float box_cols[] = {
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,  // red
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,  // blue
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,  // green
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,  // yellow
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,  // cyan
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,  // magenta
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,  // orange
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  // gray
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,    // black
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+
+    1,0,0,	1,0,0,	1,0,0,	1,0,0,      // multicolour (each face a dif colour)
+    1,.3,0,	1,.3,0,	1,.3,0,	1,.3,0,
+    1,1,0,	1,1,0,	1,1,0,	1,1,0,
+    0,1,0,	0,1,0,	0,1,0,	0,1,0,
+    0,.3,1,	0,.3,1,	0,.3,1,	0,.3,1,
+    .5,.3,1,	.5,.3,1,	.5,.3,1, 	.5,.3,1,
+    1,0,1,	1,0,1,	1,0,1, 	1,0,1,
+    1,0,0,	1,0,0,	1,0,0,	1,0,0,
+    1,.3,0,	1,.3,0,	1,.3,0,	1,.3,0,
+    1,1,0,	1,1,0,	1,1,0,	1,1,0,
+    0,1,0,	0,1,0,	0,1,0,	0,1,0,
+    0,.3,1,	0,.3,1,	0,.3,1,	0,.3,1,
+    .5,.3,1,	.5,.3,1,	.5,.3,1, 	.5,.3,1,
+    1,0,1,	1,0,1,	1,0,1, 	1,0,1,
+};
+
 // constructor
 Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    drawMode = GL_QUADS;
+    drawMode = DRAW_FACES;
     scale = 1;
 }
 
@@ -23,6 +129,7 @@ void Renderer::initializeGL()
     // Qt support for inline GL function calls
 	initializeOpenGLFunctions();
 
+    // enable depth and face culling
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
@@ -42,7 +149,10 @@ void Renderer::initializeGL()
     m_MMatrixUniform = m_program->uniformLocation("model_matrix");
     m_programID = m_program->programId();
 
+    // add corner triangles to VBO
     generateBorderTriangles();
+
+    // add unit cube to VBO
     setupBox();
 }
 
@@ -236,11 +346,11 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
     QTextStream cout(stdout);
     cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
 
-    QPoint deltaPos = (event->pos() - prevMousePos) * 0.5f;
-
-    if (scaling)
+    QPoint deltaPos = (event->pos() - prevMousePos);
+    rotationVel *= 0;
+    if (isScaling)
     {
-        scale += deltaPos.x();
+        scale -= ((float)deltaPos.x()) / 50.0;
         if (scale < 0)
             scale = 0;
     }
@@ -248,21 +358,25 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
         if (event->buttons() & Qt::LeftButton)
         {
             rotation.setX(rotation.x() + deltaPos.x());
+            rotationVel.setX(deltaPos.x());
         }
     else
         if (event->buttons() & Qt::MiddleButton)
         {
             rotation.setY(rotation.y() + deltaPos.x());
+            rotationVel.setY(deltaPos.x());
         }
     else
         if (event->buttons() & Qt::RightButton)
         {
             rotation.setZ(rotation.z() + deltaPos.x());
+            rotationVel.setZ(deltaPos.x());
         }
     prevMousePos = event->pos();
     paintGL();
 }
 
+// resets the renderer current view
 void Renderer::resetView()
 {
     rotation = QVector3D(0, 0, 0);
@@ -295,11 +409,19 @@ void Renderer::drawTriangles()
     glDisableVertexAttribArray(m_posAttr);
 }
 
+// public set method for game
 void Renderer::setGame(Game *game)
 {
     this->game = game;
 }
 
+// public set method for isScaling flag
+void Renderer::setIsScaling(bool val)
+{
+    this->isScaling = val;
+}
+
+// draws all cubes for the "well"
 void Renderer::drawWalls(QVector3D offset)
 {
     int width = game->getWidth();
@@ -315,14 +437,14 @@ void Renderer::drawWalls(QVector3D offset)
         QVector3D cubePos = QVector3D(-1, i, 0.0f);
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-        drawBox(0);
+        drawBox(GRAY_IDX);
 
         // right wall
         cubePos = QVector3D(width, i, 0.0f);
         model_matrix.setToIdentity();
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-        drawBox(0);
+        drawBox(GRAY_IDX);
     }
 
     // draw the well bottom
@@ -333,95 +455,15 @@ void Renderer::drawWalls(QVector3D offset)
         QVector3D cubePos = QVector3D(i, -1, 0.0f);
         model_matrix.translate(cubePos + offset);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
-        //generateCube(Qt::gray);
-        drawBox(0);
+        drawBox(GRAY_IDX);
     }
 }
 
+// Change the draw mode (Wire, Face, Multicolor)
 void Renderer::setDrawMode(int mode)
 {
     drawMode = mode;
 }
-
-// Define the box's geometry (as triangles), normals, and colour
-const float box_coords[] = {
-    0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
-    0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
-    0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
-    1,1,0,  1,1,1,  1,0,1, 1,0,0,   // right
-    0,1,1,  0,0,1,  1,0,1, 1,1,1,   // front
-    1,1,0,  1,0,0,  0,0,0, 0,1,0,   // back
-};
-
-const float box_norms[] = {
-    0,1,0,   0,1,0,   0,1,0,   0,1,0,   // top
-    0,-1,0,  0,-1,0,  0,-1,0,  0,-1,0,  // bottom
-    -1,0,0,  -1,0,0,  -1,0,0,  -1,0,0,  // left
-    1,0,0,   1,0,0,   1,0,0,   1,0,0,   // right
-    0,0,1,   0,0,1,   0,0,1,   0,0,1,   // front
-    0,0,-1,  0,0,-1,  0,0,-1,  0,0,-1,  // back
-};
-
-QColor colors[7] = {
-    Qt::black,
-    Qt::red,
-    Qt::blue,
-    Qt::yellow,
-    Qt::green,
-    Qt::magenta,
-    Qt::cyan
-};
-
-const float box_cols[] = {
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-};
 
 void Renderer::setupBox()
 {
@@ -443,13 +485,16 @@ void Renderer::setupBox()
 
 void Renderer::drawBox(int cIdx)
 {
-    int verts= 4;
-    int quads= 6;
-    int floats= 3;
+    int glDrawMode = 0;
+    int floats = 3; // 3 floats per vert
+    int verts = 4;  // 4 verts per quad
+    int quads = 6;  // 6 quads per box
 
     long cBufferSize = sizeof(box_cols) * sizeof(float);
     long vBufferSize = sizeof(box_coords) * sizeof(float);
     long nBufferSize = sizeof(box_norms) * sizeof(float);
+
+    long cBufferOffset = 0;
 
     // Bind to the correct context
     glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo);
@@ -461,13 +506,36 @@ void Renderer::drawBox(int cIdx)
 
     // Specifiy where these are in the VBO
     glVertexAttribPointer(this->m_posAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)0);
-    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + sizeof(float) * floats * verts * quads * cIdx));
+
+    switch (drawMode)
+    {
+        case DRAW_WIRE:     // wireframe
+            cBufferOffset = sizeof(float) * floats * verts * quads * BLACK_IDX; // draw lines in black
+            glDrawMode = GL_LINES;
+            break;
+        case DRAW_FACES:
+            cBufferOffset = sizeof(float) * floats * verts * quads * cIdx;
+            glDrawMode = GL_QUADS;
+            break;
+        case DRAW_MULTI:     // multicolor
+            cBufferOffset = sizeof(float) * floats * verts * (quads * MULTI_IDX + cIdx);
+            glDrawMode = GL_QUADS;
+            break;
+    }
+    glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferOffset));
     glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
 
     // Draw the faces
-    glDrawArrays(drawMode, 0, 24); // 24 vertices
+    glDrawArrays(glDrawMode, 0, 24); // 24 vertices
 
     glDisableVertexAttribArray(m_norAttr);
     glDisableVertexAttribArray(m_colAttr);
     glDisableVertexAttribArray(m_posAttr);
+}
+
+
+void Renderer::update()
+{
+    rotation += rotationVel;
+    QOpenGLWidget::update();
 }

@@ -41,9 +41,12 @@ private slots:
     void newGame();
     void setDrawMode(QAction * action);
     void pause();
+    void incSpeed();
+    void decSpeed();
 protected:
 
     virtual void keyPressEvent(QKeyEvent * event);
+    virtual void keyReleaseEvent(QKeyEvent * event);
 private:
     // Main widget for drawing
     Renderer *renderer;
@@ -66,7 +69,9 @@ private:
     QAction * mSlowDownAction;
     QAction * mAutoIncAction;
 
+    // timer for calling update function
     QTimer * timer;
+    float tickSpeed;
     Game * game;
     // helper function for creating actions
     void createActions();

@@ -28,6 +28,9 @@ Window::Window(QWidget *parent) :
     // Setup the game menu
     mGameMenu = menuBar()->addMenu(tr("&Game"));
     mGameMenu->addAction(mPauseAction);  // add pausing
+    mGameMenu->addAction(mSpeedUpAction);  // add pausing
+    mGameMenu->addAction(mSlowDownAction);  // add pausing
+    mGameMenu->addAction(mAutoIncAction);  // add pausing
 
     // Setup the application's widget collection
     QVBoxLayout * layout = new QVBoxLayout();
@@ -47,7 +50,8 @@ Window::Window(QWidget *parent) :
     // Setup the game timer
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-    timer->start(200);
+    tickSpeed = 500;
+    timer->start(tickSpeed);
 }
 
 // helper function for creating actions
@@ -96,6 +100,21 @@ void Window::createActions()
     mPauseAction->setShortcut(QKeySequence(Qt::Key_P));
     mPauseAction->setStatusTip(tr("Pause game"));
     connect(mPauseAction, SIGNAL(triggered()), this, SLOT(pause()));
+
+    mSpeedUpAction = new QAction(tr("&Speed Up"), this);
+    mSpeedUpAction->setShortcut(QKeySequence(Qt::Key_PageUp));
+    mSpeedUpAction->setStatusTip(tr("Increase the speed of the game play"));
+    connect(mSpeedUpAction, SIGNAL(triggered()), this, SLOT(incSpeed()));
+
+    mSlowDownAction = new QAction(tr("&Speed Down"), this);
+    mSlowDownAction->setShortcut(QKeySequence(Qt::Key_PageDown));
+    mSlowDownAction->setStatusTip(tr("Decrease the speed of the game play"));
+    connect(mSlowDownAction, SIGNAL(triggered()), this, SLOT(decSpeed()));
+
+    mAutoIncAction = new QAction(tr("&Auto-Increase"), this);
+    mAutoIncAction->setShortcut(QKeySequence(Qt::Key_A));
+    mAutoIncAction->setStatusTip(tr("Automatically increase the speed"));
+    connect(mAutoIncAction, SIGNAL(triggered()), this, SLOT(decSpeed()));
 }
 
 // destructor
@@ -104,6 +123,7 @@ Window::~Window()
     delete renderer;
 }
 
+// Restarts the game
 void Window::newGame()
 {
     game->reset();
@@ -116,6 +136,16 @@ void Window::update()
     renderer->update();
 }
 
+void Window::incSpeed()
+{
+    tickSpeed += 100;
+}
+
+void Window::decSpeed()
+{
+    tickSpeed -= 100;
+}
+
 void Window::pause()
 {
     if (!timer->isActive())
@@ -126,8 +156,10 @@ void Window::pause()
 
 void Window::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() == int(Qt::Key_Left))
-        game->moveLeft();    
+    if (event->key() == int(Qt::Key_Shift))
+        renderer->setIsScaling(true);
+    else if (event->key() == int(Qt::Key_Left))
+        game->moveLeft();
     else if (event->key() == int(Qt::Key_Right))
         game->moveRight();
     else if (event->key() == int(Qt::Key_Up))
@@ -142,17 +174,22 @@ void Window::keyPressEvent(QKeyEvent *event)
         return;
     }
     renderer->update();
+}
 
+void Window::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == int(Qt::Key_Shift))
+        renderer->setIsScaling(false);
 }
 
 // Sets the given colour
 void Window::setDrawMode(QAction * action)
 {
     if (action == mWireAction)
-        renderer->setDrawMode(GL_LINES);
+        renderer->setDrawMode(Renderer::DRAW_WIRE);
     else if (action == mFaceAction)
-        renderer->setDrawMode(GL_QUADS);
+        renderer->setDrawMode(Renderer::DRAW_FACES);
     else
-        renderer->setDrawMode(GL_QUADS);
+        renderer->setDrawMode(Renderer::DRAW_MULTI);
 
 }

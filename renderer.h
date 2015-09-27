@@ -34,7 +34,16 @@ public:
     virtual ~Renderer();
 
     void setGame(Game *game);
+    // public accessor
+    void setIsScaling(bool val);
     void setDrawMode(int mode);
+
+    virtual void update();
+
+
+    static const int DRAW_WIRE  = 0;
+    static const int DRAW_FACES = 1;
+    static const int DRAW_MULTI = 2;
 
 public slots:
     void resetView();
@@ -102,7 +111,7 @@ private:
     Game *game;
 
     int drawMode;
-    bool scaling;
+    bool isScaling;
     float scale;
     QPoint prevMousePos;
     QVector3D rotation;
