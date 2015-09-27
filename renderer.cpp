@@ -183,23 +183,17 @@ void Renderer::paintGL()
 
     // Not implemented: set up lighting (if necessary)
 
-    int width = game->getWidth();  // includes the game walls in width
-    int height = game->getHeight();
-
     // You'll be drawing unit cubes, so the game will have width
     // 10 and height 24 (game = 20, stripe = 4).  Let's translate
     // the game so that we can draw it starting at (0,0) but have
     // it appear centered in the window.
     QVector3D offset = QVector3D(-5.0f, -12.0f, 0.0f);
 
+    // draw the game board + walls
     drawWalls(offset);
-
     drawGame(offset);
 
-    QMatrix4x4 b;
-    b.translate(offset);
-    glUniformMatrix4fv(m_MMatrixUniform, 1, false, b.data());
-    drawTriangles();
+    drawTriangles(offset);
 
     // deactivate the program
     m_program->release();
@@ -350,7 +344,7 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
             rotationVel.setZ(deltaPos.x());
         }
     prevMousePos = event->pos();
-    paintGL();
+    update();
 }
 
 // resets the renderer current view
@@ -360,8 +354,12 @@ void Renderer::resetView()
     rotationVel = QVector3D(0, 0, 0);
 }
 
-void Renderer::drawTriangles()
+void Renderer::drawTriangles(QVector3D offset)
 {
+    QMatrix4x4 m;
+    m.translate(offset);
+    glUniformMatrix4fv(m_MMatrixUniform, 1, false, m.data());
+
     long cBufferSize = sizeof(tri_colourList) * sizeof(float);
     long vBufferSize = sizeof(tri_vertList) * sizeof(float);
     long nBufferSize = sizeof(tri_normalList) * sizeof(float);
@@ -545,6 +543,7 @@ void Renderer::drawBox(int cIdx)
 
 void Renderer::update()
 {
-    rotation += rotationVel;
+    rotation += rotationVel;    
+    paintGL();
     QOpenGLWidget::update();
 }
