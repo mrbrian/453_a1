@@ -12,16 +12,6 @@
 #define MULTI_IDX 9
 
 // Define the box's geometry (as quads)
-const float box_co2ords[] = {
-    0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
-    0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
-    0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
-    1,1,0,  1,1,1,  1,0,1, 1,0,0,   // right
-    0,1,1,  0,0,1,  1,0,1, 1,1,1,   // front
-    1,1,0,  1,0,0,  0,0,0, 0,1,0,   // back
-};
-
-// Define the box's geometry (as quads)
 const float box_coords[] = {
     0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
     0,1,0,  1,1,0,  1,0,0, 0,0,0,   // back
