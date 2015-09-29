@@ -21,16 +21,22 @@ To run the program, on the terminal enter the following command:
 <Insert a precise user manual on how to interact with the program; eg. 
 short-cut keys, mouse movements, menu items, widgets, etc.>
 
-N - New Game
-R - Reset View
-Q - Quit
-W - Wireframe
-F - Faces
-M - Multicolour
-PageUp - Increase Speed 
-PageDown - Decrease Speed
-A - Auto increase speed
+File menu
+	N - New Game
+	R - Reset View
+	Q - Quit
 
+Draw menu
+	W - Wireframe
+	F - Faces
+	M - Multicolour
+	
+Game menu
+	PageUp - Increase Speed 
+	PageDown - Decrease Speed
+	A - Auto increase speed
+
+	
 == 3. ALGORITHMS and DESIGN DECISIONS: ===
 
 <Insert a description of the algorithms created and design decisions taken>
@@ -54,6 +60,8 @@ renderer.cpp
 renderer.h
 window.cpp
 window.h
+per-fragment-phong.fs.glsl
+per-fragment-phong.vs.glsl
 
 === 5. PROGRAM ASSUMPTIONS: ===
 
