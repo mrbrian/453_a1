@@ -1,7 +1,7 @@
 #include "window.h"
 #include "renderer.h"
 
-#define INIT_TICK_SPEED 500
+#define INIT_TICK_DELAY 500
 
 Window::Window(QWidget *parent) :
     QMainWindow(parent)
@@ -51,18 +51,18 @@ Window::Window(QWidget *parent) :
 
     // Setup the game timer
     gameTimer = new QTimer(this);
-    connect(gameTimer, SIGNAL(timeout()), this, SLOT(gameUpdate()));
-    tickSpeed = INIT_TICK_SPEED;
-    gameTimer->start(INIT_TICK_SPEED);
+    connect(gameTimer, SIGNAL(timeout()), this, SLOT(gameUpdate()));   
+    tickDelay = INIT_TICK_DELAY;
+    gameTimer->start(tickDelay);
 
     autoSpeed = false;
 
-    score = 0;
     // Setup the quit button
     scoreLabel = new QLabel(this);
     //connect(quitButton, SIGNAL(clicked()), qApp, SLOT(quit()));
 
-    // Add quit button
+    // Add game score label
+    score = 0;
     layout->addWidget(scoreLabel);
     scoreLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     scoreLabel->setText("Score: 0");
@@ -145,7 +145,7 @@ Window::~Window()
 void Window::newGame()
 {
     score = 0;
-    tickSpeed = INIT_TICK_SPEED;
+    tickDelay = INIT_TICK_DELAY;
     game->reset();
 }
 
@@ -159,39 +159,51 @@ void Window::update()
 // Game updating function
 void Window::gameUpdate()
 {
-    score += game->tick();
+    int points = game->tick();
+
+    if (points < 0)     // tick returns -1 if the game is over
+        return;
+
+    score += points;
+
     if (autoSpeed)
     {
-        tickSpeed = std::max(25, 500 - (score * 100));
-        gameTimer->setInterval(tickSpeed);
+        tickDelay = std::max(25, tickDelay - 2);
+        //tickSpeed = std::max(25, 500 - (score * 100));
+        gameTimer->setInterval(tickDelay);
     }
-    scoreLabel->setText("Score: " + QString::number(score));
+    // update the score label
+    scoreLabel->setText("Speed: " + QString::number(tickDelay) + "\nScore: " + QString::number(score));
 }
 
-void Window::incSpeed()
-{
-    tickSpeed -= 50;
-    tickSpeed = std::max(25, tickSpeed - 50);
-    gameTimer->setInterval(tickSpeed);
-}
-
+//
 void Window::toggleAutoSpeed()
 {
     autoSpeed = true;
-    tickSpeed = std::max(25, 500 - (score * 50));
-    gameTimer->setInterval(tickSpeed);
+    tickDelay = std::max(25, 500 - (score * 50));
+    gameTimer->setInterval(tickDelay);
 }
 
+// Increases gameplay speed
+void Window::incSpeed()
+{
+    tickDelay -= 50;
+    tickDelay = std::max(25, tickDelay - 50);
+    gameTimer->setInterval(tickDelay);
+}
+
+// Decreases gameplay speed
 void Window::decSpeed()
 {
-    tickSpeed += 50;
-    gameTimer->setInterval(tickSpeed);
+    tickDelay += 50;
+    gameTimer->setInterval(tickDelay);
 }
 
+// pause the game by stopping the timer
 void Window::pause()
 {
     if (!gameTimer->isActive())
-        gameTimer->start(tickSpeed);
+        gameTimer->start(tickDelay);
     else
         gameTimer->stop();
 }

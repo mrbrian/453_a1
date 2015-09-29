@@ -81,7 +81,7 @@ private:
     bool autoSpeed;
 
     // current game tick speed
-    int tickSpeed;
+    int tickDelay;
 
     // Game reference
     Game * game;
