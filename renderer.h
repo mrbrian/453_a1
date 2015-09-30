@@ -117,12 +117,16 @@ private:
 
     // model scale factor
     float scale;
-
-    bool mouseDown;
+    // mouse buttons that are currently pressed
+    int mouseButtons;
+    // model scaling toggle
     bool isScaling;   
 
+    // track previous mouse position for finding rotation velocity
     QPoint prevMousePos;
+    // model rotation info
     QVector3D rotation;
+    // model rotation velocities
     QVector3D rotationVel;
 
     // timer for calling renderer updates

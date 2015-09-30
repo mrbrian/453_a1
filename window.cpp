@@ -150,13 +150,6 @@ void Window::newGame()
 }
 
 // Game updating function
-void Window::update()
-{
-    renderer->update();
-    QMainWindow::update();
-}
-
-// Game updating function
 void Window::gameUpdate()
 {
     int points = game->tick();
@@ -180,14 +173,13 @@ void Window::gameUpdate()
 void Window::toggleAutoSpeed()
 {
     autoSpeed = true;
-    tickDelay = std::max(25, 500 - (score * 50));
+    //tickDelay = std::max(25, 500 - (score * 50));
     gameTimer->setInterval(tickDelay);
 }
 
 // Increases gameplay speed
 void Window::incSpeed()
 {
-    tickDelay -= 50;
     tickDelay = std::max(25, tickDelay - 50);
     gameTimer->setInterval(tickDelay);
 }
@@ -208,6 +200,7 @@ void Window::pause()
         gameTimer->stop();
 }
 
+// trigger game events or model scaling
 void Window::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key())

@@ -18,9 +18,6 @@ To run the program, on the terminal enter the following command:
 
 === 2. PROGRAM USE: ===
 
-<Insert a precise user manual on how to interact with the program; eg. 
-short-cut keys, mouse movements, menu items, widgets, etc.>
-
 File menu
 	N - New Game
 	R - Reset View
@@ -35,23 +32,24 @@ Game menu
 	PageUp - Increase Speed 
 	PageDown - Decrease Speed
 	A - Auto increase speed
-
+	
+Left Click & Drag 	 - rotate model along x-axis
+Middle Click & Drag  - rotate model along y-axis
+Right Click & Drag 	 - rotate model along z-axis
+Shift + Click & Drag - scale model along all axis
+	
 	
 == 3. ALGORITHMS and DESIGN DECISIONS: ===
 
-<Insert a description of the algorithms created and design decisions taken>
-
-Used composition of transformations 
-Separate timers for game and renderer
+Used composition of transformations to rotate/scale/translate the model instead of rotating the view.
+Used separate timers for game and renderer to maintain a constant FPS.
+Used QCursor::pos() to get mouse position, since mouseMoveEvent doesn't get called when the mouse is not moving.  (made it impossible to rotate the model and have it not spin afterwards)
 Auto Increase speed 
 
-Scoring system added
-
+Scoring system added, displayed via label at the bottom of the window.
+The current game delay is also displayed at the bottom.
 
 === 4. FILES SUBMITTED: ===
-
-<Insert a list of files that have been submitted by the assignment in case
-there is a discrepancy in the submission>
 
 main.cpp
 game.cpp
@@ -65,12 +63,10 @@ per-fragment-phong.vs.glsl
 
 === 5. PROGRAM ASSUMPTIONS: ===
 
-<Insert a short description of any assumptions made>
+When a mouse button is clicked, all the rotations should stop.
 
 
 === 6. DECLARATION AND IMAGE PERMISSION: ===
-
-<Initial the following:>
 
 _BY_ I have read the regulations regarding plagarism. I affirm with my initials
 that I have worked on my own solution to this assignment, and the code I am

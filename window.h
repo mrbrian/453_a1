@@ -36,16 +36,20 @@ public:
 
 
 private slots:
-    // game update function
-    void update();
+    // game updte function
     void gameUpdate();
 
     // restarts the game
     void newGame();
+    // sets the draw mode of the renderer
     void setDrawMode(QAction * action);
+    // pauses game
     void pause();
+    // increases game speed
     void incSpeed();
+    // decreases game speed
     void decSpeed();
+    // increases the game speed slowly over time
     void toggleAutoSpeed();
 
 protected:
@@ -86,8 +90,9 @@ private:
     // Game reference
     Game * game;
 
-    // Game score & score UI label
+    // Game score
     int score;
+    // Score UI label
     QLabel * scoreLabel;
 
     // helper function for creating actions

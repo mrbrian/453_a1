@@ -119,7 +119,7 @@ Renderer::Renderer(QWidget *parent)
     drawMode = FACES;
     scale = 1;
     isScaling = false;
-    mouseDown = false;
+    mouseButtons = false;
 
     // timer for calling renderer update function
     renderTimer = new QTimer(this);
@@ -309,22 +309,28 @@ void Renderer::generateBorderTriangles()
 // override mouse press event
 void Renderer::mousePressEvent(QMouseEvent * event)
 {
-    mouseDown = true;
     QTextStream cout(stdout);
     cout << "Stub: Button " << event->button() << " pressed.\n";
 
-    rotationVel *= 0;   // reset rotation velocity
+    // reset rotation velocity
+    rotationVel *= 0;
 
+    // initialize previous mouse position
     prevMousePos = event->pos();
+
+    // save buttons
+    mouseButtons = event->buttons();
 }
 
 // override mouse release event
 void Renderer::mouseReleaseEvent(QMouseEvent * event)
 {
-    mouseDown = false;
     QTextStream cout(stdout);
     cout << "Stub: Button " << event->button() << " pressed.\n";
     cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
+
+    // save buttons
+    mouseButtons = event->buttons();
 }
 
 // override mouse move event
@@ -332,40 +338,12 @@ void Renderer::mouseMoveEvent(QMouseEvent * event)
 {
     QTextStream cout(stdout);
     cout << "Stub: Motion at " << event->x() << ", " << event->y() << ".\n";
-
-    QPoint deltaPos = (event->pos() - prevMousePos);    // calculate movement
-
-    float spinScale = 1 / 10.0;
-    if (isScaling)
-    {
-        scale -= ((float)deltaPos.x()) / 50.0;  // slow down the scaling rate
-        if (scale < 0)  // prevent negative scaling
-            scale = 0;
-    }
-    else
-    {
-        if (event->buttons() & Qt::LeftButton)      // LB rotates along x-axis
-        {
-            rotation.setX(rotation.x() + deltaPos.x() * spinScale);
-            rotationVel.setX(deltaPos.x() * spinScale);
-        }
-        if (event->buttons() & Qt::MiddleButton)    // MB rotates along y-axis
-        {
-            rotation.setY(rotation.y() + deltaPos.x() * spinScale);
-            rotationVel.setY(deltaPos.x() * spinScale);
-        }
-        if (event->buttons() & Qt::RightButton)     // RB rotates along z-axis
-        {
-            rotation.setZ(rotation.z() + deltaPos.x() * spinScale);
-            rotationVel.setZ(deltaPos.x() * spinScale);
-        }
-    }
-    prevMousePos = event->pos();
 }
 
 // resets the renderer current view
 void Renderer::resetView()
 {
+    scale = 1;
     rotation = QVector3D(0, 0, 0);
     rotationVel = QVector3D(0, 0, 0);
 }
@@ -442,7 +420,7 @@ void Renderer::drawWalls(QMatrix4x4 * transform)
     // draw the well bottom
     for (i = 0; i < width ; i++)
     {
-        QMatrix4x4 model_matrix = *transform;
+        QMatrix4x4 model_matrix(*transform);
 
         QVector3D cubePos = QVector3D(i, -1, 0.0f);
         model_matrix.translate(cubePos);
@@ -457,20 +435,23 @@ void Renderer::drawGame(QMatrix4x4 * transform)
     int height = game->getHeight();
 
     int i = 0;
-    // draw block in each spot
+    // iterate through the game board and draw each block
     for (i = 0; i < width * (height + 4); i++)
     {
         int r = i / width;
         int c = i % width;
-        QMatrix4x4 model_matrix = *transform;
+        QMatrix4x4 model_matrix(*transform);
 
+        // check the board position
         int cell = game->get(r, c);
 
+        // if this board position is empty, skip
         if (cell == -1)
             continue;
 
         QVector3D cubePos = QVector3D(c, r, 0.0f);
 
+        // transform * translate
         model_matrix.translate(cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
 
@@ -557,9 +538,43 @@ void Renderer::drawBox(int cIdx)
 // updates the continuous spin, and repaints widget
 void Renderer::update()
 {
-    if (!mouseDown)
+    // only spin the model if no buttons are pressed
+    if (mouseButtons == Qt::NoButton)
     {
         rotation += rotationVel;
+    }
+    else
+    {
+        // get the current mouse position and find movement
+        QPoint currMousePos = mapFromGlobal(QCursor::pos());
+        QPoint deltaPos = (currMousePos - prevMousePos);
+
+        float spinScale = 0.1;
+        if (isScaling)
+        {
+            scale -= ((float)deltaPos.x()) * 0.01;  // slow down the scaling rate
+            if (scale < 0)  // prevent negative scaling
+                scale = 0;
+        }
+        else
+        {
+            if (mouseButtons & Qt::LeftButton)      // LB rotates along x-axis
+            {
+                rotation.setX(rotation.x() + deltaPos.x() * spinScale);
+                rotationVel.setX(deltaPos.x() * spinScale);
+            }
+            if (mouseButtons & Qt::MiddleButton)    // MB rotates along y-axis
+            {
+                rotation.setY(rotation.y() + deltaPos.x() * spinScale);
+                rotationVel.setY(deltaPos.x() * spinScale);
+            }
+            if (mouseButtons & Qt::RightButton)     // RB rotates along z-axis
+            {
+                rotation.setZ(rotation.z() + deltaPos.x() * spinScale);
+                rotationVel.setZ(deltaPos.x() * spinScale);
+            }
+        }
+        prevMousePos = currMousePos;
     }
     QOpenGLWidget::update();
 }
