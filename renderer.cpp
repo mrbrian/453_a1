@@ -95,7 +95,9 @@ const float box_cols[] = {
     0,0,0,  0,0,0,  0,0,0,  0,0,0,
     0,0,0,  0,0,0,  0,0,0,  0,0,0,
     0,0,0,  0,0,0,  0,0,0,  0,0,0,
+};
 
+const float box_cols2[] = {
     1,0,0,	1,0,0,	1,0,0,	1,0,0,      // multicolour (each face a dif colour)
     1,.3,0,	1,.3,0,	1,.3,0,	1,.3,0,
     1,1,0,	1,1,0,	1,1,0,	1,1,0,
@@ -469,6 +471,7 @@ void Renderer::setDrawMode(DrawMode mode)
 void Renderer::setupBox()
 {
     long cBufferSize = sizeof(box_cols) * sizeof(float);
+    long cBufferSize2 = sizeof(box_cols2) * sizeof(float);
     long vBufferSize = sizeof(box_coords) * sizeof(float);
     long nBufferSize = sizeof(box_norms) * sizeof(float);
 
@@ -476,12 +479,13 @@ void Renderer::setupBox()
     glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo);
 
     // Allocate buffer
-    glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + nBufferSize, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + cBufferSize2 + nBufferSize, NULL, GL_STATIC_DRAW);
 
     // Upload the data to the GPU
     glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &box_coords[0]);
     glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &box_cols[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, nBufferSize, &box_norms[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, cBufferSize2, &box_cols2[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + cBufferSize2, nBufferSize, &box_norms[0]);
 }
 
 // Draw a unit cube and use colors stored at position cIdx
@@ -493,6 +497,7 @@ void Renderer::drawBox(int cIdx)
     int quads = 6;  // 6 quads per box
 
     long cBufferSize = sizeof(box_cols) * sizeof(float);
+    long cBufferSize2 = sizeof(box_cols2) * sizeof(float);
     long vBufferSize = sizeof(box_coords) * sizeof(float);
     long nBufferSize = sizeof(box_norms) * sizeof(float);
 
@@ -515,17 +520,17 @@ void Renderer::drawBox(int cIdx)
             cBufferOffset = sizeof(float) * floats * verts * quads * BLACK_IDX; // draw lines in black
             glDrawMode = GL_LINE_STRIP;
             break;
-        case FACES:
+        case FACES:     // regular faces
             cBufferOffset = sizeof(float) * floats * verts * quads * cIdx;
             glDrawMode = GL_QUADS;
             break;
         case MULTI:     // multicolor
-            cBufferOffset = sizeof(float) * floats * verts * (quads * MULTI_IDX + cIdx);
+            cBufferOffset = cBufferSize + sizeof(float) * floats * verts * (quads + cIdx);
             glDrawMode = GL_QUADS;
             break;
     }
     glVertexAttribPointer(this->m_colAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferOffset));
-    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize));
+    glVertexAttribPointer(this->m_norAttr, 3, GL_FLOAT, 0, GL_FALSE, (const GLvoid*)(vBufferSize + cBufferSize + cBufferSize2));
 
     // Draw the faces
     glDrawArrays(glDrawMode, 0, 24); // 24 vertices
