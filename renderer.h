@@ -12,7 +12,7 @@
 #include "game.h"
 #include <QWidget>
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions>
+#include <QOpenGLFunctions_4_2_Core>
 #include <QMatrix4x4>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLShader>
@@ -21,7 +21,7 @@
 
 using namespace std;
 
-class Renderer : public QOpenGLWidget, protected QOpenGLFunctions
+class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_2_Core
 {
 
     // informs the qmake that a Qt moc_* file will need to be generated
@@ -71,7 +71,6 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent * event);
 
 private:
-
     // member variables for shader manipulation
     GLuint m_programID;
     GLuint m_posAttr;
