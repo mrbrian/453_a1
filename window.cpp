@@ -247,10 +247,10 @@ void Window::keyReleaseEvent(QKeyEvent *event)
 void Window::setDrawMode(QAction * action)
 {
     if (action == mWireAction)
-        renderer->setDrawMode(Renderer::DRAW_WIRE);
+        renderer->setDrawMode(Renderer::WIRE);
     else if (action == mFaceAction)
-        renderer->setDrawMode(Renderer::DRAW_FACES);
+        renderer->setDrawMode(Renderer::FACES);
     else
-        renderer->setDrawMode(Renderer::DRAW_MULTI);
+        renderer->setDrawMode(Renderer::MULTI);
 
 }

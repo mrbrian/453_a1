@@ -34,23 +34,22 @@ public:
     // destructor
     virtual ~Renderer();
 
-    void setGame(Game *game);
-    // public accessor
-    void setIsScaling(bool val);
-    void setDrawMode(int mode);
+    // draw mode types
+    enum DrawMode {WIRE, FACES, MULTI};
 
-    static const int DRAW_WIRE  = 0;
-    static const int DRAW_FACES = 1;
-    static const int DRAW_MULTI = 2;
+    // public accessors
+    void setGame(Game *game);
+    void setIsScaling(bool val);
+    void setDrawMode(DrawMode mode);
 
 public slots:
+    // updates the transformations and calls widget update
     void update();
+
+    // resets the model transformations
     void resetView();
 
 protected:
-
-    // override fundamental drawing functions
-
     // Called when OpenGL is first initialized
     void initializeGL();
 
@@ -84,7 +83,6 @@ private:
 
     // pointer to border triangles vbo
     GLuint m_triVbo;
-
     // pointer to box vbo
     GLuint m_boxVbo;
 
@@ -102,26 +100,33 @@ private:
     void generateBorderTriangles();    
     void drawTriangles(QMatrix4x4 * transform);
 
-    // helper functions for drawing the game walls/game board
+    // drawing the game walls
     void drawWalls(QMatrix4x4 * transform);
+    // draw the game board
     void drawGame(QMatrix4x4 * transform);
-
-    // helper functions for drawing/initializing a cube
+    // initializing a cube
     void setupBox();
+    // draw a cube with specific color index
     void drawBox(int cIdx);
 
+    // tetris game reference
     Game *game;
 
     // keep track of which renderering mode to draw
     // 0 = wireframe, 1 = face, 2 = multicolour
-    int drawMode;
+    DrawMode drawMode;
+
+    // model scale factor
+    float scale;
 
     bool mouseDown;
-    bool isScaling;
-    float scale;
+    bool isScaling;   
+
     QPoint prevMousePos;
     QVector3D rotation;
     QVector3D rotationVel;
+
+    // timer for calling renderer updates
     QTimer * renderTimer;
 };
 

@@ -116,7 +116,7 @@ const float box_cols[] = {
 Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    drawMode = DRAW_FACES;
+    drawMode = FACES;
     scale = 1;
     isScaling = false;
     mouseDown = false;
@@ -479,7 +479,7 @@ void Renderer::drawGame(QMatrix4x4 * transform)
 }
 
 // Change the draw mode (Wire, Face, Multicolor)
-void Renderer::setDrawMode(int mode)
+void Renderer::setDrawMode(DrawMode mode)
 {
     drawMode = mode;
 }
@@ -530,15 +530,15 @@ void Renderer::drawBox(int cIdx)
 
     switch (drawMode)
     {
-        case DRAW_WIRE:     // wireframe
+        case WIRE:     // wireframe
             cBufferOffset = sizeof(float) * floats * verts * quads * BLACK_IDX; // draw lines in black
             glDrawMode = GL_LINE_STRIP;
             break;
-        case DRAW_FACES:
+        case FACES:
             cBufferOffset = sizeof(float) * floats * verts * quads * cIdx;
             glDrawMode = GL_QUADS;
             break;
-        case DRAW_MULTI:     // multicolor
+        case MULTI:     // multicolor
             cBufferOffset = sizeof(float) * floats * verts * (quads * MULTI_IDX + cIdx);
             glDrawMode = GL_QUADS;
             break;
