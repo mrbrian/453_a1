@@ -33,10 +33,10 @@ Game menu
 	PageDown - Decrease Speed
 	A - Auto increase speed
 	
-Left Click & Drag 	 - rotate model along x-axis
-Middle Click & Drag  - rotate model along y-axis
-Right Click & Drag 	 - rotate model along z-axis
-Shift + Click & Drag - scale model along all axis
+Left Click & Drag	- rotate model along x-axis
+Middle Click & Drag  	- rotate model along y-axis
+Right Click & Drag 	- rotate model along z-axis
+Shift + Click & Drag 	- scale model along all axis
 	
 	
 == 3. ALGORITHMS and DESIGN DECISIONS: ===
@@ -44,7 +44,9 @@ Shift + Click & Drag - scale model along all axis
 Used composition of transformations to rotate/scale/translate the model instead of rotating the view.
 Used separate timers for game and renderer to maintain a constant FPS.
 Used QCursor::pos() to get mouse position, since mouseMoveEvent doesn't get called when the mouse is not moving.  (made it impossible to rotate the model and have it not spin afterwards)
-Auto Increase speed 
+When using "Auto Increase speed" setting, it will increase the game speed by 2 ms per game tick.
+
+glBufferSubData had issues with uploading a single large array, so i had to break the colour arrays into two(box_cols & box_cols_multi).
 
 Scoring system added, displayed via label at the bottom of the window.
 The current game delay is also displayed at the bottom.
@@ -63,8 +65,7 @@ per-fragment-phong.vs.glsl
 
 === 5. PROGRAM ASSUMPTIONS: ===
 
-When a mouse button is clicked, all the rotations should stop.
-
+When a mouse button is clicked, all the rotations on all axis should stop.  (and not resume)
 
 === 6. DECLARATION AND IMAGE PERMISSION: ===
 

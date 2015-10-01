@@ -11,109 +11,6 @@
 #define BLACK_IDX 8
 #define MULTI_IDX 9
 
-// Define the box's geometry (as quads)
-const float box_coords[] = {
-    0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
-    0,1,0,  1,1,0,  1,0,0, 0,0,0,   // back
-    0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
-    0,1,1,  0,0,1,  1,0,1, 1,1,1,   // front
-    1,1,0,  1,1,1,  1,0,1, 1,0,0,   // right
-    0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
-};
-
-// box normals
-const float box_norms[] = {
-    0,1,0,   0,1,0,   0,1,0,   0,1,0,   // top
-    0,0,-1,  0,0,-1,  0,0,-1,  0,0,-1,  // back
-    -1,0,0,  -1,0,0,  -1,0,0,  -1,0,0,  // left
-    0,0,1,   0,0,1,   0,0,1,   0,0,1,   // front
-    1,0,0,   1,0,0,   1,0,0,   1,0,0,   // right
-    0,-1,0,  0,-1,0,  0,-1,0,  0,-1,0,  // bottom
-};
-
-// all box colours
-const float box_cols[] = {
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,  // red
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-    1,0,0,  1,0,0,  1,0,0,  1,0,0,
-
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,  // blue
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-    0,0,1,  0,0,1,  0,0,1,  0,0,1,
-
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,  // green
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-    0,1,0,  0,1,0,  0,1,0,  0,1,0,
-
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,  // yellow
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-    1,1,0,  1,1,0,  1,1,0,  1,1,0,
-
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,  // cyan
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-    0,1,1,  0,1,1,  0,1,1,  0,1,1,
-
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,  // magenta
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-    1,0,1,  1,0,1,  1,0,1,  1,0,1,
-
-    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,  // orange
-    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
-    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
-    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
-    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
-    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
-
-    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  // gray
-    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
-    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
-    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
-    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
-    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
-
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,    // black
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-    0,0,0,  0,0,0,  0,0,0,  0,0,0,
-};
-
-const float box_cols2[] = {
-    1,0,0,	1,0,0,	1,0,0,	1,0,0,      // multicolour (each face a dif colour)
-    1,.3,0,	1,.3,0,	1,.3,0,	1,.3,0,
-    1,1,0,	1,1,0,	1,1,0,	1,1,0,
-    0,1,0,	0,1,0,	0,1,0,	0,1,0,
-    0,.3,1,	0,.3,1,	0,.3,1,	0,.3,1,
-    .5,.3,1,	.5,.3,1,	.5,.3,1, 	.5,.3,1,
-    1,0,1,	1,0,1,	1,0,1, 	1,0,1,
-    1,0,0,	1,0,0,	1,0,0,	1,0,0,
-    1,.3,0,	1,.3,0,	1,.3,0,	1,.3,0,
-    1,1,0,	1,1,0,	1,1,0,	1,1,0,
-    0,1,0,	0,1,0,	0,1,0,	0,1,0,
-    0,.3,1,	0,.3,1,	0,.3,1,	0,.3,1,
-    .5,.3,1,	.5,.3,1,	.5,.3,1, 	.5,.3,1,
-    1,0,1,	1,0,1,	1,0,1, 	1,0,1,
-};
-
 // constructor
 Renderer::Renderer(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -403,17 +300,17 @@ void Renderer::drawWalls(QMatrix4x4 * transform)
     // draw the well sides
     for (i = -1; i < height; i++)
     {
-        QMatrix4x4 model_matrix = *transform;
+        QMatrix4x4 model_matrix = *transform;       // copy original transform matrix
 
         // left wall
         QVector3D cubePos = QVector3D(-1, i, 0.0f);
-        model_matrix.translate(cubePos);
+        model_matrix.translate(cubePos);            // transform * translate
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
 
         // right wall
         cubePos = QVector3D(width, i, 0.0f);
-        model_matrix = *transform;
+        model_matrix = *transform;                  // copy original transform matrix
         model_matrix.translate(cubePos);
         glUniformMatrix4fv(m_MMatrixUniform, 1, false, model_matrix.data());
         drawBox(GRAY_IDX);
@@ -442,7 +339,7 @@ void Renderer::drawGame(QMatrix4x4 * transform)
     {
         int r = i / width;
         int c = i % width;
-        QMatrix4x4 model_matrix(*transform);
+        QMatrix4x4 model_matrix(*transform);    // copy original transform matrix
 
         // check the board position
         int cell = game->get(r, c);
@@ -467,11 +364,115 @@ void Renderer::setDrawMode(DrawMode mode)
     drawMode = mode;
 }
 
+// Define the box's geometry (as quads)
+const float box_coords[] = {
+    0,1,0,  0,1,1,  1,1,1, 1,1,0,   // top
+    0,1,0,  1,1,0,  1,0,0, 0,0,0,   // back
+    0,1,0,  0,0,0,  0,0,1, 0,1,1,   // left
+    0,1,1,  0,0,1,  1,0,1, 1,1,1,   // front
+    1,1,0,  1,1,1,  1,0,1, 1,0,0,   // right
+    0,0,0,  1,0,0,  1,0,1, 0,0,1,   // bottom
+};
+
+// box normals
+const float box_norms[] = {
+    0,1,0,   0,1,0,   0,1,0,   0,1,0,   // top
+    0,0,-1,  0,0,-1,  0,0,-1,  0,0,-1,  // back
+    -1,0,0,  -1,0,0,  -1,0,0,  -1,0,0,  // left
+    0,0,1,   0,0,1,   0,0,1,   0,0,1,   // front
+    1,0,0,   1,0,0,   1,0,0,   1,0,0,   // right
+    0,-1,0,  0,-1,0,  0,-1,0,  0,-1,0,  // bottom
+};
+
+// all box colours
+const float box_cols[] = {
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,  // red
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+    1,0,0,  1,0,0,  1,0,0,  1,0,0,
+
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,  // blue
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+    0,0,1,  0,0,1,  0,0,1,  0,0,1,
+
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,  // green
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+    0,1,0,  0,1,0,  0,1,0,  0,1,0,
+
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,  // yellow
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+    1,1,0,  1,1,0,  1,1,0,  1,1,0,
+
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,  // cyan
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+    0,1,1,  0,1,1,  0,1,1,  0,1,1,
+
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,  // magenta
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+    1,0,1,  1,0,1,  1,0,1,  1,0,1,
+
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,  // orange
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+    1,.5,0,  1,.5,0,  1,.5,0,  1,.5,0,
+
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  // gray
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+    .5,.5,.5,  .5,.5,.5,  .5,.5,.5,  .5,.5,.5,
+
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,    // black
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+    0,0,0,  0,0,0,  0,0,0,  0,0,0,
+};
+
+// face colours in multicoloured mode, each face a dif colour
+const float box_cols_multi[] = {
+    1,0,0,	1,0,0,	1,0,0,	1,0,0,
+    1,.3,0,	1,.3,0,	1,.3,0,	1,.3,0,
+    1,1,0,	1,1,0,	1,1,0,	1,1,0,
+    0,1,0,	0,1,0,	0,1,0,	0,1,0,
+    0,.3,1,	0,.3,1,	0,.3,1,	0,.3,1,
+    .5,.3,1,	.5,.3,1,	.5,.3,1, 	.5,.3,1,
+    1,0,1,	1,0,1,	1,0,1, 	1,0,1,
+    1,0,0,	1,0,0,	1,0,0,	1,0,0,
+    1,.3,0,	1,.3,0,	1,.3,0,	1,.3,0,
+    1,1,0,	1,1,0,	1,1,0,	1,1,0,
+    0,1,0,	0,1,0,	0,1,0,	0,1,0,
+    0,.3,1,	0,.3,1,	0,.3,1,	0,.3,1,
+    .5,.3,1,	.5,.3,1,	.5,.3,1, 	.5,.3,1,
+    1,0,1,	1,0,1,	1,0,1, 	1,0,1,
+};
+
 // Saves all the cube info to the VBO
 void Renderer::setupBox()
 {
     long cBufferSize = sizeof(box_cols) * sizeof(float);
-    long cBufferSize2 = sizeof(box_cols2) * sizeof(float);
+    long cBufferSizeMulti = sizeof(box_cols_multi) * sizeof(float);
     long vBufferSize = sizeof(box_coords) * sizeof(float);
     long nBufferSize = sizeof(box_norms) * sizeof(float);
 
@@ -479,13 +480,13 @@ void Renderer::setupBox()
     glBindBuffer(GL_ARRAY_BUFFER, this->m_boxVbo);
 
     // Allocate buffer
-    glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + cBufferSize2 + nBufferSize, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + cBufferSizeMulti + nBufferSize, NULL, GL_STATIC_DRAW);
 
     // Upload the data to the GPU
     glBufferSubData(GL_ARRAY_BUFFER, 0, vBufferSize, &box_coords[0]);
     glBufferSubData(GL_ARRAY_BUFFER, vBufferSize, cBufferSize, &box_cols[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, cBufferSize2, &box_cols2[0]);
-    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + cBufferSize2, nBufferSize, &box_norms[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize, cBufferSizeMulti, &box_cols_multi[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, vBufferSize + cBufferSize + cBufferSizeMulti, nBufferSize, &box_norms[0]);
 }
 
 // Draw a unit cube and use colors stored at position cIdx
@@ -497,7 +498,7 @@ void Renderer::drawBox(int cIdx)
     int quads = 6;  // 6 quads per box
 
     long cBufferSize = sizeof(box_cols) * sizeof(float);
-    long cBufferSize2 = sizeof(box_cols2) * sizeof(float);
+    long cBufferSize2 = sizeof(box_cols_multi) * sizeof(float);
     long vBufferSize = sizeof(box_coords) * sizeof(float);
     long nBufferSize = sizeof(box_norms) * sizeof(float);
 

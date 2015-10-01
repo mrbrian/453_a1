@@ -1,4 +1,3 @@
-#version 410 core
 //
 // CPSC 453 - Introduction to Computer Graphics
 // Assignment 1

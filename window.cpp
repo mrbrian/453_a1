@@ -166,7 +166,7 @@ void Window::gameUpdate()
         gameTimer->setInterval(tickDelay);
     }
     // update the score label
-    scoreLabel->setText("Speed: " + QString::number(tickDelay) + "\nScore: " + QString::number(score));
+    scoreLabel->setText("GameTickDelay: " + QString::number(tickDelay) + "\nScore: " + QString::number(score));
 }
 
 //
