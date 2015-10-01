@@ -30,9 +30,9 @@ Window::Window(QWidget *parent) :
     // Setup the game menu
     mGameMenu = menuBar()->addMenu(tr("&Game"));
     mGameMenu->addAction(mPauseAction);  // add pausing
-    mGameMenu->addAction(mSpeedUpAction);  // add pausing
-    mGameMenu->addAction(mSlowDownAction);  // add pausing
-    mGameMenu->addAction(mAutoIncAction);  // add pausing
+    mGameMenu->addAction(mSpeedUpAction);  // add speed up
+    mGameMenu->addAction(mSlowDownAction);  // add speed down
+    mGameMenu->addAction(mAutoIncAction);  // add auto increase speed
 
     // Setup the application's widget collection
     QVBoxLayout * layout = new QVBoxLayout();
@@ -93,6 +93,7 @@ void Window::createActions()
     // Toggles to line drawing
     mDrawGroup = new QActionGroup(this);
     connect(mDrawGroup, SIGNAL(triggered(QAction *)), this, SLOT(setDrawMode(QAction *)));
+    mDrawGroup->setExclusive(true);
 
     // Sets drawing mode to wireframe
     mWireAction = new QAction(tr("&Wireframe"), this);
@@ -109,6 +110,12 @@ void Window::createActions()
     mMultiAction->setShortcut(QKeySequence(Qt::Key_M));
     mMultiAction->setStatusTip(tr("Multicoloured mode"));
     mDrawGroup->addAction(mMultiAction);
+
+    // set draw menu items to exclusive
+    mWireAction->setCheckable(true);
+    mFaceAction->setCheckable(true);
+    mFaceAction->setChecked(true);      // face mode on by default
+    mMultiAction->setCheckable(true);
 
     // Pauses the game
     mPauseAction = new QAction(tr("&Pause"), this);
