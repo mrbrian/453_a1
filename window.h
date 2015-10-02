@@ -8,6 +8,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "math.h"
 #include "game.h"
 #include <QMainWindow>
 #include <QApplication>
@@ -19,6 +20,7 @@
 #include <QVBoxLayout>
 #include <QActionGroup>
 #include <QTimer>
+#include <QTime>
 
 class Renderer;
 
@@ -83,6 +85,7 @@ private:
 
     // auto speed increasing flag
     bool autoSpeed;
+    long elapsedAutoSpeedTime;
 
     // current game tick speed
     int tickDelay;

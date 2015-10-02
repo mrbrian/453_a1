@@ -2,6 +2,7 @@
 #include "renderer.h"
 
 #define INIT_TICK_DELAY 500
+#define MIN_TICK_DELAY  25
 
 Window::Window(QWidget *parent) :
     QMainWindow(parent)
@@ -55,6 +56,7 @@ Window::Window(QWidget *parent) :
     tickDelay = INIT_TICK_DELAY;
     gameTimer->start(tickDelay);
 
+    elapsedAutoSpeedTime = 0;
     autoSpeed = false;
 
     // Setup the quit button
@@ -153,6 +155,9 @@ void Window::newGame()
 {
     score = 0;
     tickDelay = INIT_TICK_DELAY;
+    gameTimer->setInterval(tickDelay);
+    autoSpeed = false;
+    elapsedAutoSpeedTime = 0;
     game->reset();
 }
 
@@ -168,26 +173,32 @@ void Window::gameUpdate()
 
     if (autoSpeed)
     {
-        tickDelay = std::max(25, tickDelay - 2);
-        //tickSpeed = std::max(25, 500 - (score * 100));
+        int deltaSec = elapsedAutoSpeedTime / 1000;
+
+        // Calculate the tick delay!  Basically take 500ms and subtract a log.
+        // The game should reach its highest speed in 120sec.
+        //tickDelay = max(MIN_TICK_DELAY, INIT_TICK_DELAY - (int)(log10(deltaSec + 1) / log10(1.01012989347))); // + 1 to avoid log10(0)
+        //int autoDecAmt = (int)(-12.48221781 * pow(0.97534459894, deltaSec));
+        //tickDelay = max(MIN_TICK_DELAY, tickDelay + autoDecAmt);
+        tickDelay = max(MIN_TICK_DELAY, (int)(500 * pow(0.97534459894, deltaSec)));
         gameTimer->setInterval(tickDelay);
     }
     // update the score label
-    scoreLabel->setText("GameTickDelay: " + QString::number(tickDelay) + "\nScore: " + QString::number(score));
+    scoreLabel->setText("GameTickDelay: " + QString::number(tickDelay) + "\nScore: " + QString::number(score));    
+    elapsedAutoSpeedTime += tickDelay;
 }
 
-//
+// turns auto speed increase on/off
 void Window::toggleAutoSpeed()
 {
-    autoSpeed = true;
-    //tickDelay = std::max(25, 500 - (score * 50));
-    gameTimer->setInterval(tickDelay);
+    autoSpeed = !autoSpeed;
+    elapsedAutoSpeedTime = 0;
 }
 
 // Increases gameplay speed
 void Window::incSpeed()
 {
-    tickDelay = std::max(25, tickDelay - 50);
+    tickDelay = std::max(MIN_TICK_DELAY, tickDelay - 50);
     gameTimer->setInterval(tickDelay);
 }
 
@@ -202,9 +213,13 @@ void Window::decSpeed()
 void Window::pause()
 {
     if (!gameTimer->isActive())
+    {
         gameTimer->start(tickDelay);
+    }
     else
+    {
         gameTimer->stop();
+    }
 }
 
 // trigger game events or model scaling
