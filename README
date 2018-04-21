@@ -1,9 +1,5 @@
 CPSC453 - Assignment 1
 
-NAME: Brian Yee
-UCID Number: 00993104
-Tutorial Section: T02
-
 === 1. EXECUTION: ===
 
 To compile the program, on the terminal enter the following commands:
@@ -39,46 +35,3 @@ Right Click & Drag 	- rotate model along z-axis
 Shift + Click & Drag 	- scale model along all axis
 	
 	
-== 3. ALGORITHMS and DESIGN DECISIONS: ===
-
-Used composition of transformations to rotate/scale/translate the model instead of rotating the view.
-Used separate timers for game and renderer to maintain a constant FPS.
-Used QCursor::pos() to get mouse position, since mouseMoveEvent doesn't get called when the mouse is not moving.  (made it impossible to rotate the model and have it not spin afterwards)
-When using "Auto Increase speed" setting, it will increase the game speed by 2 ms per game tick.
-
-glBufferSubData had issues with uploading a single large array, so i had to break the colour arrays into two(box_cols & box_cols_multi).
-
-Scoring system added, displayed via label at the bottom of the window.
-The current game delay is also displayed at the bottom.
-
-=== 4. FILES SUBMITTED: ===
-
-main.cpp
-game.cpp
-game.h
-renderer.cpp
-renderer.h
-window.cpp
-window.h
-per-fragment-phong.fs.glsl
-per-fragment-phong.vs.glsl
-
-=== 5. PROGRAM ASSUMPTIONS: ===
-
-When a mouse button is clicked, all the rotations on all axis should stop.  (and not resume)
-
-=== 6. DECLARATION AND IMAGE PERMISSION: ===
-
-_BY_ I have read the regulations regarding plagarism. I affirm with my initials
-that I have worked on my own solution to this assignment, and the code I am
-submitting is my own.
-
-<Mark with an X if desired. No marks will be deducted either way>
-
-_X_ I grant the instructor and/or TAs permission to use images submitted and/or
-   assignment screenshots for future CPSC453 courses.
-
-_X_ If permission has been granted above, I would prefer the images to remain 
-   annonymous. <Otherwise credit will be given, as is due>
-
-__
